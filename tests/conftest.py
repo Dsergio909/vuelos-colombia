@@ -17,6 +17,9 @@ import correr_sql  # noqa: E402
 def con():
     c = correr_sql.conectar(":memory:")
     correr_sql.construir(c)
+    # Tablas de apoyo que crean algunas consultas (por ejemplo, pronostico)
+    for archivo in correr_sql.consultas_de_analisis():
+        correr_sql.ultima_consulta(c, archivo)
     yield c
     c.close()
 

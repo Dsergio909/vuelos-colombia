@@ -38,7 +38,7 @@ Lo que encontré en los datos al explorarlos:
 3. **Error en el README:** decía "38 pruebas que corren en GitHub Actions", pero 2 de esas 38 solo corren a mano (contra la API en vivo). **Arreglo:** "36 pruebas con cada cambio y 2 más a mano".
 4. **Error en el README:** decía "9 archivos `.sql`" y son 11 (2 de carga y limpieza y 9 de análisis). **Arreglo:** "9 consultas de análisis".
 5. Comentario equivocado en `sql/12_temporadas.sql`: decía que el aeropuerto estuvo cerrado de abril a agosto de 2020. Lo que muestran los datos es que casi no hubo pasajeros (de 3.589 a 12.314 nacionales al mes, contra 2,4 millones en enero). **Arreglo:** el texto dice eso.
-6. La prueba `test_readme.py` revisa que las 28 cifras clave del README (en español y en inglés) salgan de `sql/18_cifras_clave.sql`. Todas aparecen.
+6. La prueba `test_readme.py` revisa que las 28 cifras clave del README (en español y en inglés) salgan de la consulta de cifras clave (hoy `sql/99_cifras_clave.sql`). Todas aparecen.
 
 ## Pendiente
 

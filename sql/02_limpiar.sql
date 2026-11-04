@@ -1,5 +1,5 @@
 -- 02_limpiar.sql
--- Limpia los datos crudos y arma el modelo que usan las consultas 10 a 18.
+-- Limpia los datos crudos y arma el modelo que usan las consultas 10 a 99.
 --
 -- Que se corrige y por que:
 --   1. Tipos: año, mes, pasajeros y carga llegan como texto. Se convierten con

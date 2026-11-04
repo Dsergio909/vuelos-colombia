@@ -48,3 +48,8 @@ def test_participaciones_de_aerolineas_no_pasan_de_100(resultado):
 def test_ocupacion_entre_0_y_100(resultado):
     for f in resultado("16"):
         assert 0 < f["ocupacion_pct"] <= 100
+
+
+def test_todos_los_controles_de_calidad_pasan(resultado):
+    malos = [f["control"] for f in resultado("20") if f["estado"] != "Pasa"]
+    assert not malos, malos

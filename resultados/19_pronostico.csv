@@ -1,0 +1,25 @@
+tipo,anio,mes,trafico,pronostico,real,error_pct
+Prueba con 2025,2025,7,Nacional,2841946.0,2895426,-1.8
+Prueba con 2025,2025,8,Nacional,2829362.0,2861556,-1.1
+Prueba con 2025,2025,9,Nacional,2639097.0,2707554,-2.5
+Prueba con 2025,2025,10,Nacional,2721895.0,2881760,-5.5
+Prueba con 2025,2025,11,Nacional,2755763.0,2898472,-4.9
+Prueba con 2025,2025,12,Nacional,2959711.0,3087910,-4.2
+Prueba con 2025,2025,7,Internacional,2481472.0,2271571,9.2
+Prueba con 2025,2025,8,Internacional,2424448.0,2201506,10.1
+Prueba con 2025,2025,9,Internacional,2173668.0,1931654,12.5
+Prueba con 2025,2025,10,Internacional,2283929.0,2080700,9.8
+Prueba con 2025,2025,11,Internacional,2297628.0,1933337,18.8
+Prueba con 2025,2025,12,Internacional,2544148.0,2286845,11.3
+Pronostico 2026,2026,7,Nacional,3012800.0,,
+Pronostico 2026,2026,8,Nacional,3032517.0,,
+Pronostico 2026,2026,9,Nacional,2841007.0,,
+Pronostico 2026,2026,10,Nacional,2955159.0,,
+Pronostico 2026,2026,11,Nacional,3050188.0,,
+Pronostico 2026,2026,12,Nacional,3266356.0,,
+Pronostico 2026,2026,7,Internacional,2506362.0,,
+Pronostico 2026,2026,8,Internacional,2451097.0,,
+Pronostico 2026,2026,9,Internacional,2172812.0,,
+Pronostico 2026,2026,10,Internacional,2281884.0,,
+Pronostico 2026,2026,11,Internacional,2257393.0,,
+Pronostico 2026,2026,12,Internacional,2569894.0,,

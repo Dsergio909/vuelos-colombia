@@ -9,7 +9,7 @@ Quería saber qué rutas mueven más pasajeros y carga en Colombia, en qué mese
 ## Lo que encontré
 
 **1. Lo nacional no creció. Todo el crecimiento fue internacional.**
-Entre 2022 y 2025 los pasajeros nacionales pasaron de 32,7 a 32,9 millones: apenas 0,4 % más. Los internacionales pasaron de 15,2 a 24,7 millones, un 61,9 % más. Por eso lo internacional ya es el 42,9 % de los pasajeros, cuando en 2022 era el 31,8 %.
+Entre 2022 y 2025 los pasajeros nacionales pasaron de 32,7 a 32,9 millones: apenas 0,4 % más. Los internacionales pasaron de 15,2 a 24,7 millones, un 61,9 % más. Por eso lo internacional ya es el 42,9 % de los pasajeros, cuando en 2022 era el 31,8 %. Ojo: en el primer semestre de 2026 lo nacional sí creció, 6,1 % contra el mismo semestre de 2025. Habrá que ver si se sostiene.
 
 **2. Cuando Viva Air y Ultra Air dejaron de volar, Avianca y LATAM se quedaron con el mercado. Después llegó JetSMART.**
 En 2022 Viva y Ultra tenían el 24,7 % de los pasajeros nacionales. En los datos, Viva reporta hasta febrero de 2023 y Ultra hasta marzo. Ese año Avianca y LATAM (con sus filiales) pasaron del 62,3 % al 77,9 %, y el índice de concentración HHI subió de 2.483 a 3.219 (por encima de 2.500 se considera muy concentrado). En 2025 JetSMART ya tenía el 13,5 %, Avianca y LATAM bajaron a 68,7 % y el HHI quedó en 2.738.
@@ -22,6 +22,9 @@ Con un índice donde 100 es un mes normal, en vuelos nacionales diciembre marca 
 
 **5. La carga aérea es internacional, sale por Bogotá hacia Miami y tiene su pico en abril.**
 El 85,1 % de las toneladas de 2025 fueron de vuelos internacionales. Solo la ruta Bogotá - Miami llevó el 47,5 % de esa carga internacional. La carga que sale de Colombia tiene su pico en abril, con un índice de 126,6. Los datos no dicen qué se lleva, pero el pico coincide con la temporada de flores del Día de la Madre. Eso queda como hipótesis, no como dato.
+
+**Un pronóstico simple para el segundo semestre de 2026.**
+Con el índice de temporada de los tres años anteriores y lo real de enero a junio, armé un pronóstico de julio a diciembre. Primero lo probé con 2025, como si no supiera qué iba a pasar: en lo nacional se equivocó en 3,4 % por mes en promedio, pero en lo internacional en 12,0 %. Eso pasa porque los años de base todavía traen la recuperación de la pandemia. Así que solo me fío del nacional: para julio a diciembre de 2026 da 18,2 millones de pasajeros. El cálculo está en [sql/19_pronostico.sql](sql/19_pronostico.sql).
 
 Un dato más: en vuelos nacionales regulares los aviones van llenos en un 81,5 % (2025), según las sillas ofrecidas que reporta Aerocivil.
 
@@ -66,14 +69,14 @@ Los datos derivados de este repo (la copia en `datos/fuente/` y los CSV de `resu
 
 1. **Datos:** un script baja los dos conjuntos por la API de datos.gov.co (sin clave, en páginas de 50.000 filas, con reintentos) y comprueba que llegaron todas las filas.
 2. **Limpieza en SQL (DuckDB):** tipos, 52 filas sin pasajeros que cuento como 0 y dejo marcadas, ciudades escritas de dos formas ("CALI" y "SANTIAGO DE CALI"), una misma aerolínea con varios nombres y rutas sin dirección (Bogotá - Medellín suma los dos sentidos).
-3. **Consultas:** 9 consultas de análisis en archivos `.sql` numerados y comentados, con CTE y funciones de ventana (`rank`, `lag`, participaciones y acumulados).
-4. **Pruebas:** 36 pruebas que corren en GitHub Actions con cada cambio, y 2 más que se corren a mano y comparan contra la API en vivo. Revisan que los totales por año cuadren con los que calcula la propia API, que la limpieza no pierda ni duplique filas y que cada cifra de este README salga de los datos.
+3. **Consultas:** 11 consultas de análisis en archivos `.sql` numerados y comentados (incluye un informe de calidad de datos y el pronóstico), con CTE y funciones de ventana (`rank`, `lag`, participaciones y acumulados).
+4. **Pruebas:** 37 pruebas que corren en GitHub Actions con cada cambio, y 2 más que se corren a mano y comparan contra la API en vivo. Revisan que los totales por año cuadren con los que calcula la propia API, que la limpieza no pierda ni duplique filas y que cada cifra de este README salga de los datos.
 5. **Power BI:** Power Query lee la misma copia y la limpia con los mismos pasos. Encima van las medidas DAX y las cinco páginas.
 
 El plan y las preguntas los definí yo. El código lo escribió Claude (IA) y yo revisé cada cifra contra la fuente.
 
 ```
-sql/          consultas numeradas (01 cargar, 02 limpiar, 10 a 18 análisis)
+sql/          consultas numeradas (01 cargar, 02 limpiar, 10 a 19 análisis, 99 cifras del README)
 scripts/      descargar_datos.py y correr_sql.py
 tests/        pruebas con pytest
 datos/fuente/ copia fija de Aerocivil en Parquet (6 MB) y sus totales oficiales
@@ -108,7 +111,7 @@ Para abrir el tablero: Power BI Desktop (gratis). En Power Query cambia el pará
 - Los datos no traen tarifas, retrasos ni cancelaciones. No se puede saber si una ruta es rentable ni qué tan puntual es una aerolínea.
 - Tampoco dicen qué tipo de carga se mueve. La relación entre el pico de abril y las flores es una hipótesis.
 - Las rutas son entre aeropuertos. Un pasajero que va de Cali a Madrid por Bogotá puede quedar como dos trayectos.
-- Falta probar un pronóstico de pasajeros por mes para 2026.
+- El pronóstico es simple a propósito. Un modelo con tendencia o con más años serviría mejor para lo internacional.
 
 ## Cómo explicarlo en 2 minutos
 

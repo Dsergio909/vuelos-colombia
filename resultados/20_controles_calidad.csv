@@ -1,0 +1,13 @@
+orden,control,esperado,obtenido,estado
+1,Filas de Origen-Destino iguales a la API (478.010),478010,478010,Pasa
+2,Filas de Trafico por Equipo iguales a la API (216.599),216599,216599,Pasa
+3,Años o meses que no se pudieron leer,0,0,Pasa
+4,Pasajeros vacios en la fuente (se cuentan como 0),52,52,Pasa
+5,Valores negativos de pasajeros o carga,0,0,Pasa
+6,Filas fuera del alcance: trafico Especial,12240,12240,Pasa
+7,Filas fuera del alcance: internacionales sin Colombia,10,10,Pasa
+8,Paises con tilde sin corregir,0,0,Pasa
+9,Filas de trafico de Colombia sin ciudad o sin aerolinea,0,0,Pasa
+10,Aeropuertos repetidos (mismo codigo y pais),0,0,Pasa
+11,"Combinaciones repetidas (aerolinea, mes, ruta, trafico, tipo de vuelo); se dejan",73,73,Pasa
+12,Meses con datos (enero 2020 a junio 2026),78,78,Pasa

@@ -1,4 +1,4 @@
--- 18_cifras_clave.sql
+-- 99_cifras_clave.sql
 -- Las cifras que cita el README, calculadas aqui y en ningun otro lado.
 -- La prueba tests/test_readme.py revisa que cada una aparezca tal cual en
 -- README.md y README.en.md, para que el README no tenga cifras inventadas.
@@ -96,6 +96,16 @@ f(clave, valor, decimales) as (
               / (select sum(carga_kg) from v_od where anio = 2025 and trafico = 'Internacional'), 1
     union all select 'indice_carga_sale_abril', (select idx from indice_carga where mes = 4), 1
     union all select 'ocupacion_nacional_2025_pct', (select pct from ocupacion where anio = 2025), 1
+    -- 6. 2026 y el pronostico de julio a diciembre (sql/19_pronostico.sql)
+    union all select 'nacional_s1_2026_variacion_pct',
+        100.0 * ((select sum(pasajeros) from v_od where trafico = 'Nacional' and anio = 2026)
+               / (select sum(pasajeros) from v_od where trafico = 'Nacional' and anio = 2025 and mes <= 6) - 1), 1
+    union all select 'pronostico_error_nacional_pct',
+        (select avg(100.0 * abs(pronostico - real) / real) from pronostico where anio = 2025 and trafico = 'Nacional'), 1
+    union all select 'pronostico_error_internacional_pct',
+        (select avg(100.0 * abs(pronostico - real) / real) from pronostico where anio = 2025 and trafico = 'Internacional'), 1
+    union all select 'pronostico_nacional_s2_2026_millones',
+        (select sum(pronostico) from pronostico where anio = 2026 and trafico = 'Nacional') / 1e6, 1
 )
 select clave, round(valor, decimales) as valor, decimales
 from f;

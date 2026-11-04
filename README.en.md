@@ -9,7 +9,7 @@ I wanted to know which routes carry the most passengers and cargo in Colombia, w
 ## What I found
 
 **1. The domestic market didn't grow. All the growth was international.**
-Between 2022 and 2025 domestic passengers went from 32.7 to 32.9 million: only 0.4% more. International passengers went from 15.2 to 24.7 million, 61.9% more. International is now 42.9% of all passengers, up from 31.8% in 2022.
+Between 2022 and 2025 domestic passengers went from 32.7 to 32.9 million: only 0.4% more. International passengers went from 15.2 to 24.7 million, 61.9% more. International is now 42.9% of all passengers, up from 31.8% in 2022. Note: in the first half of 2026 domestic did grow, 6.1% against the same half of 2025. We'll see if it holds.
 
 **2. When Viva Air and Ultra Air stopped flying, Avianca and LATAM took the market. Then JetSMART arrived.**
 In 2022 Viva and Ultra had 24.7% of domestic passengers. In the data, Viva reports until February 2023 and Ultra until March. That year Avianca and LATAM (with their subsidiaries) went from 62.3% to 77.9%, and the HHI concentration index rose from 2,483 to 3,219 (above 2,500 is considered highly concentrated). By 2025 JetSMART had 13.5%, Avianca and LATAM were down to 68.7% and the HHI was 2,738.
@@ -22,6 +22,9 @@ With an index where 100 is a normal month, December scores 110.7 on domestic fli
 
 **5. Air cargo is international, leaves through Bogotá to Miami and peaks in April.**
 85.1% of the tonnes in 2025 flew on international flights. The Bogotá - Miami route alone carried 47.5% of that international cargo. Cargo leaving Colombia peaks in April, with an index of 126.6. The data doesn't say what is shipped, but the peak matches the flower season before Mother's Day. That's a hypothesis, not a fact from the data.
+
+**A simple forecast for the second half of 2026.**
+With the seasonal index of the three previous years and the actual January to June numbers, I built a July to December forecast. First I tested it on 2025, as if I didn't know what happened: on domestic it was off by 3.4% per month on average, but on international by 12.0%. That's because the base years still carry the post-pandemic recovery. So I only trust the domestic one: for July to December 2026 it gives 18.2 million passengers. The calculation is in [sql/19_pronostico.sql](sql/19_pronostico.sql).
 
 One more: on regular domestic flights planes are 81.5% full (2025), based on the seats offered that Aerocivil reports.
 
@@ -66,14 +69,14 @@ Derived data in this repo (the copy in `datos/fuente/` and the CSVs in `resultad
 
 1. **Data:** a script downloads both datasets from the datos.gov.co API (no key, 50,000 rows per page, with retries) and checks that every row arrived.
 2. **Cleaning in SQL (DuckDB):** types, 52 rows with no passengers that I count as 0 and flag, cities written two ways ("CALI" and "SANTIAGO DE CALI"), one airline with several names, and routes without direction (Bogotá - Medellín adds both ways).
-3. **Queries:** 9 analysis queries in numbered, commented `.sql` files, with CTEs and window functions (`rank`, `lag`, shares and running totals).
-4. **Tests:** 36 tests that run on GitHub Actions on every change, plus 2 that run on demand against the live API. They check that yearly totals match the ones the API itself calculates, that cleaning doesn't lose or duplicate rows and that every number in this README comes from the data.
+3. **Queries:** 11 analysis queries in numbered, commented `.sql` files (including a data quality report and the forecast), with CTEs and window functions (`rank`, `lag`, shares and running totals).
+4. **Tests:** 37 tests that run on GitHub Actions on every change, plus 2 that run on demand against the live API. They check that yearly totals match the ones the API itself calculates, that cleaning doesn't lose or duplicate rows and that every number in this README comes from the data.
 5. **Power BI:** Power Query reads the same copy and cleans it with the same steps. DAX measures and the five pages go on top.
 
 I defined the plan and the questions. The code was written by Claude (AI) and I checked every number against the source.
 
 ```
-sql/          numbered queries (01 load, 02 clean, 10 to 18 analysis)
+sql/          numbered queries (01 load, 02 clean, 10 to 19 analysis, 99 README numbers)
 scripts/      descargar_datos.py (download) and correr_sql.py (run queries)
 tests/        pytest tests
 datos/fuente/ fixed copy of the Aerocivil data in Parquet (6 MB) and its official totals
@@ -108,7 +111,7 @@ To open the dashboard: Power BI Desktop (free). In Power Query, set the `Carpeta
 - The data has no fares, delays or cancellations. You can't tell if a route is profitable or how punctual an airline is.
 - It doesn't say what kind of cargo is shipped either. The link between the April peak and flowers is a hypothesis.
 - Routes are between airports. A passenger flying Cali to Madrid through Bogotá may show up as two legs.
-- A monthly passenger forecast for 2026 is still to be tried.
+- The forecast is simple on purpose. A model with trend or more years would work better for international.
 
 ## How to explain it in 2 minutes
 

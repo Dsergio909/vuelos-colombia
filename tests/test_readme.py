@@ -1,4 +1,4 @@
-"""Cada cifra clave del README sale de los datos (sql/18_cifras_clave.sql).
+"""Cada cifra clave del README sale de los datos (sql/99_cifras_clave.sql).
 
 Si alguien cambia una consulta o actualiza los datos, esta prueba avisa que
 el README quedo con cifras viejas.
@@ -22,7 +22,7 @@ def formato(valor: float, decimales: int, idioma: str) -> str:
 
 
 def cifras(resultado):
-    return [(f["clave"], f["valor"], f["decimales"]) for f in resultado("18")]
+    return [(f["clave"], f["valor"], f["decimales"]) for f in resultado("99")]
 
 
 @pytest.mark.parametrize("archivo,idioma", [("README.md", "es"), ("README.en.md", "en")])
