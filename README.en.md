@@ -67,7 +67,7 @@ Derived data in this repo (the copy in `datos/fuente/` and the CSVs in `resultad
 1. **Data:** a script downloads both datasets from the datos.gov.co API (no key, 50,000 rows per page, with retries) and checks that every row arrived.
 2. **Cleaning in SQL (DuckDB):** types, 52 rows with no passengers that I count as 0 and flag, cities written two ways ("CALI" and "SANTIAGO DE CALI"), one airline with several names, and routes without direction (Bogotá - Medellín adds both ways).
 3. **Queries:** 9 analysis queries in numbered, commented `.sql` files, with CTEs and window functions (`rank`, `lag`, shares and running totals).
-4. **Tests:** 38 tests that run on GitHub Actions. They check that yearly totals match the ones the API itself calculates, that cleaning doesn't lose or duplicate rows and that every number in this README comes from the data.
+4. **Tests:** 36 tests that run on GitHub Actions on every change, plus 2 that run on demand against the live API. They check that yearly totals match the ones the API itself calculates, that cleaning doesn't lose or duplicate rows and that every number in this README comes from the data.
 5. **Power BI:** Power Query reads the same copy and cleans it with the same steps. DAX measures and the five pages go on top.
 
 I defined the plan and the questions. The code was written by Claude (AI) and I checked every number against the source.

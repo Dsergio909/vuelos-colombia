@@ -67,7 +67,7 @@ Los datos derivados de este repo (la copia en `datos/fuente/` y los CSV de `resu
 1. **Datos:** un script baja los dos conjuntos por la API de datos.gov.co (sin clave, en páginas de 50.000 filas, con reintentos) y comprueba que llegaron todas las filas.
 2. **Limpieza en SQL (DuckDB):** tipos, 52 filas sin pasajeros que cuento como 0 y dejo marcadas, ciudades escritas de dos formas ("CALI" y "SANTIAGO DE CALI"), una misma aerolínea con varios nombres y rutas sin dirección (Bogotá - Medellín suma los dos sentidos).
 3. **Consultas:** 9 consultas de análisis en archivos `.sql` numerados y comentados, con CTE y funciones de ventana (`rank`, `lag`, participaciones y acumulados).
-4. **Pruebas:** 38 pruebas que corren en GitHub Actions. Revisan que los totales por año cuadren con los que calcula la propia API, que la limpieza no pierda ni duplique filas y que cada cifra de este README salga de los datos.
+4. **Pruebas:** 36 pruebas que corren en GitHub Actions con cada cambio, y 2 más que se corren a mano y comparan contra la API en vivo. Revisan que los totales por año cuadren con los que calcula la propia API, que la limpieza no pierda ni duplique filas y que cada cifra de este README salga de los datos.
 5. **Power BI:** Power Query lee la misma copia y la limpia con los mismos pasos. Encima van las medidas DAX y las cinco páginas.
 
 El plan y las preguntas los definí yo. El código lo escribió Claude (IA) y yo revisé cada cifra contra la fuente.
