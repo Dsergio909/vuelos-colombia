@@ -51,13 +51,15 @@ table Aerolineas
 				    Periodo = Table.AddColumn(Tipos, "Periodo", each [a_o] * 100 + [n_mero_de_mes], Int64.Type),
 				    Limpio = Table.TransformColumns(Periodo, {{"sigla_empresa", each Text.Upper(Text.Trim(_)), type text},
 				        {"nombre", Text.Trim, type text}}),
-				    Ordenado = Table.Buffer(Table.Sort(Limpio, {{"sigla_empresa", Order.Ascending}, {"Periodo", Order.Descending}})),
-				    Ultimo = Table.Distinct(Table.SelectColumns(Ordenado, {"sigla_empresa", "nombre"}), {"sigla_empresa"}),
-				    // Siglas que solo aparecen en Tráfico por Equipo
-				    Equipo = Table.TransformColumns(Table.SelectColumns(EQ_crudo, {"sigla_empresa", "nombre"}),
-				        {{"sigla_empresa", each Text.Upper(Text.Trim(_)), type text}, {"nombre", Text.Trim, type text}}),
-				    Faltantes = Table.Distinct(Table.SelectRows(Equipo,
-				        each not List.Contains(Ultimo[sigla_empresa], [sigla_empresa])), {"sigla_empresa"}),
+				    // El nombre del último mes de cada sigla (Table.Max da la fila con el periodo más alto)
+				    Ultimo = Table.Group(Limpio, {"sigla_empresa"},
+				        {{"nombre", each Table.Max(_, "Periodo")[nombre], type text}}),
+				    // Siglas que solo aparecen en Tráfico por Equipo. La lista se guarda en memoria (List.Buffer)
+				    // para no volver a calcularla en cada fila
+				    SiglasOD = List.Buffer(Ultimo[sigla_empresa]),
+				    Equipo = Table.Distinct(Table.TransformColumns(Table.SelectColumns(EQ_crudo, {"sigla_empresa", "nombre"}),
+				        {{"sigla_empresa", each Text.Upper(Text.Trim(_)), type text}, {"nombre", Text.Trim, type text}}), {"sigla_empresa"}),
+				    Faltantes = Table.SelectRows(Equipo, each not List.Contains(SiglasOD, [sigla_empresa])),
 				    Todas = Table.Combine({Ultimo, Faltantes}),
 				    // Marca comercial y grupo (misma lista que sql/02_limpiar.sql)
 				    Marcas = #table({"sigla_empresa", "Marca", "Grupo"}, {

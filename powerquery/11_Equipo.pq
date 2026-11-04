@@ -3,8 +3,12 @@
 let
     Origen = EQ_crudo,
     SoloColombia = Table.SelectRows(Origen, each [tr_fico] = "N" or [tr_fico] = "I"),
+    // Solo vuelos que salen o llegan a Colombia (país sin tildes; la función corre una vez por país distinto)
+    PaisesCrudos = List.Buffer(List.Distinct(List.Transform(List.Combine({SoloColombia[pais_origen], SoloColombia[pais_destino]}), each _ ?? ""))),
+    PaisLimpio = Record.FromList(List.Transform(PaisesCrudos, fnQuitarTildes), PaisesCrudos),
     TocaColombia = Table.SelectRows(SoloColombia,
-        each fnQuitarTildes([pais_origen]) = "COLOMBIA" or fnQuitarTildes([pais_destino]) = "COLOMBIA"),
+        each Record.FieldOrDefault(PaisLimpio, [pais_origen] ?? "", null) = "COLOMBIA"
+          or Record.FieldOrDefault(PaisLimpio, [pais_destino] ?? "", null) = "COLOMBIA"),
     Columnas = Table.SelectColumns(TocaColombia, {"a_o", "mes", "sigla_empresa", "origen", "destino", "tr_fico",
         "tipo_vuelo", "n_mero_de_vuelos", "sillas_ofrecidas", "pasajeros_a_bordo", "carga_correo_a_bordo_kg"}),
     Tipos = Table.TransformColumnTypes(Columnas, {{"a_o", Int64.Type}, {"mes", Int64.Type},

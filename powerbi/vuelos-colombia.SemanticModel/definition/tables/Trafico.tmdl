@@ -133,11 +133,15 @@ table Trafico
 				        {"sigla_empresa", "Sigla"}, {"a_o", "Año"}, {"n_mero_de_mes", "Mes"}, {"origen", "Origen"},
 				        {"pais_origen", "País origen"}, {"destino", "Destino"}, {"pais_destino", "País destino"},
 				        {"tr_fico_n_i", "Tráfico"}, {"tipo_vuelo", "Tipo de vuelo"}, {"pasajeros", "Pasajeros"}, {"carga_correo_kg", "Carga kg"}}),
-				    // 2. Códigos sin espacios y en mayúsculas. Países también sin tildes: llegan "PANAMA" y "PANAMÁ"
+				    // 2. Países sin tildes: llegan "PANAMA" y "PANAMÁ". Para que sea rápido, la función corre una vez
+				    //    por cada país distinto (unos 200) y no por cada fila (casi medio millón)
+				    PaisesCrudos = List.Buffer(List.Distinct(List.Transform(List.Combine({Nombres[País origen], Nombres[País destino]}), each _ ?? ""))),
+				    PaisLimpio = Record.FromList(List.Transform(PaisesCrudos, fnQuitarTildes), PaisesCrudos),
 				    Textos = Table.TransformColumns(Nombres, {
 				        {"Sigla", each Text.Upper(Text.Trim(_)), type text}, {"Origen", each Text.Upper(Text.Trim(_)), type text},
-				        {"Destino", each Text.Upper(Text.Trim(_)), type text}, {"País origen", fnQuitarTildes, type text},
-				        {"País destino", fnQuitarTildes, type text}}),
+				        {"Destino", each Text.Upper(Text.Trim(_)), type text},
+				        {"País origen", each Record.FieldOrDefault(PaisLimpio, _ ?? "", null), type text},
+				        {"País destino", each Record.FieldOrDefault(PaisLimpio, _ ?? "", null), type text}}),
 				    // 10 filas de carga dicen "internacional" pero no tocan Colombia (por ejemplo Montevideo - Ezeiza): fuera
 				    TocaColombia = Table.SelectRows(Textos, each [País origen] = "COLOMBIA" or [País destino] = "COLOMBIA"),
 				    // 3. Tipos. Los números vienen con punto decimal: se leen con cultura en-US
