@@ -38,3 +38,27 @@ def test_formato():
     assert formato(2483.0, 0, "en") == "2,483"
     assert formato(-20.4, 1, "es") == "20,4"
     assert formato(32.7, 1, "en") == "32.7"
+
+
+def test_conteos_del_readme(request):
+    """El README dice cuantas pruebas y cuantas consultas hay. Ya se desfaso dos veces a mano."""
+    import re
+    import subprocess
+    import sys
+
+    salida = subprocess.run([sys.executable, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider"],
+                            cwd=RAIZ, capture_output=True, text=True).stdout
+    m = re.search(r"(\d+)/(\d+) tests collected \((\d+) deselected\)", salida)
+    assert m, salida[-300:]
+    automaticas, a_mano = int(m.group(1)), int(m.group(3))
+    consultas = len([p for p in (RAIZ / "sql").glob("*.sql") if 10 <= int(p.name[:2]) < 99])
+    esperado = {
+        "README.md": [f"{automaticas} pruebas que corren en GitHub Actions", f"y {a_mano} más que se corren a mano",
+                      f"{consultas} consultas de análisis"],
+        "README.en.md": [f"{automaticas} tests that run on GitHub Actions", f"plus {a_mano} that run on demand",
+                         f"{consultas} analysis queries"],
+    }
+    for archivo, frases in esperado.items():
+        texto = (RAIZ / archivo).read_text(encoding="utf-8")
+        faltan = [f for f in frases if f not in texto]
+        assert not faltan, f"{archivo} no dice: {faltan}"

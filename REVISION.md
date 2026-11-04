@@ -48,6 +48,19 @@ Lo que encontré en los datos al explorarlos:
 4. **La prueba del README atrapó un error mío:** escribí 3,3 % y 11,9 % (promedios de cifras ya redondeadas) y el cálculo exacto da 3,4 % y 12,0 %. Corregido.
 5. **Segunda opinión con IA local** (Ollama, modelo `qwen3.5:4b`, 54 segundos, sin gastar cuota de Claude): le pedí revisar solo errores de inglés en `README.en.md`. Devolvió 18 sugerencias. **Acepté 3** ("International is now" pasó a "International traffic is now", "domestic did grow, 6.1% against" pasó a "domestic traffic did grow, 6.1% compared with" y "on domestic... on international" pasó a "for domestic... for international"). **Rechacé 15:** eran reescrituras de estilo que sonaban a IA ("accounted for", "dominated by"), guiones largos (la guía de voz no los usa) y una que cambiaba el sentido ("approximately 25%", cuando la cifra es exacta).
 
+## Mejora 2: el README contra el tablero real, y una prueba para los conteos
+
+Mientras esperaba turno de Power BI, comparé el README con lo que de verdad genera `powerbi/generar_tablero.py`. Encontré **6 cosas desfasadas**:
+
+1. Decía "cinco páginas"; el tablero tiene **6** (la sexta es "Control de datos").
+2. Decía que había filtro por aerolínea; solo hay **2** filtros: año y tráfico.
+3. Decía que el tablero era un `.pbix`; es un proyecto en texto `.pbip`. Las instrucciones para abrirlo apuntaban a `datos/fuente` y el parámetro espera la carpeta `datos`.
+4. No citaba **OurAirports**, de donde salen las coordenadas del mapa (dominio público). Ahora sí, y la estructura del repo muestra `datos/referencia/` y el script de coordenadas.
+5. **Prueba nueva** (`test_conteos_del_readme`): cuenta las pruebas y las consultas de análisis y revisa que el README diga esos números. Ya se habían desfasado dos veces a mano. En su primera corrida atrapó un error: el README decía **11** consultas de análisis y son **10** (la 18 pasó a ser la 99).
+6. La estructura decía "10 a 19 análisis"; van de la 10 a la 20 (la 20 es el informe de calidad).
+
+Resultado: **38 pruebas pasan** (antes 37), 2 se corren a mano.
+
 ## Pendiente
 
 - Vuelta 3 de errores: las cifras del tablero de Power BI contra el SQL (página "Control de datos").

@@ -30,7 +30,7 @@ Un dato más: en vuelos nacionales regulares los aviones van llenos en un 81,5 %
 
 ## El tablero
 
-Cinco páginas, una por pregunta. Un solo color de acento y los filtros arriba (año, nacional o internacional, aerolínea).
+Cinco páginas, una por pregunta, y una sexta de control que muestra los totales por año para compararlos con el SQL. Un solo color de acento y dos filtros arriba: año y tráfico (nacional o internacional).
 
 | Página | Qué responde |
 |---|---|
@@ -63,25 +63,28 @@ Lo que hay que tener en cuenta:
 - **Carga incluye correo**, porque así la reporta Aerocivil.
 - La marca comercial de cada aerolínea (por ejemplo, AIRES es LATAM Colombia y FAST COLOMBIA era Viva Air) la puse yo, en una lista corta dentro de [sql/02_limpiar.sql](sql/02_limpiar.sql). Las demás aerolíneas usan el nombre que reportan.
 
+Las coordenadas de los aeropuertos para el mapa vienen de [OurAirports](https://ourairports.com/data/) (dominio público), unidas por código IATA en [scripts/coordenadas_aeropuertos.py](scripts/coordenadas_aeropuertos.py).
+
 Los datos derivados de este repo (la copia en `datos/fuente/` y los CSV de `resultados/`) quedan con la misma licencia CC BY-SA 4.0. El código tiene licencia MIT.
 
 ## Cómo lo hice
 
 1. **Datos:** un script baja los dos conjuntos por la API de datos.gov.co (sin clave, en páginas de 50.000 filas, con reintentos) y comprueba que llegaron todas las filas.
 2. **Limpieza en SQL (DuckDB):** tipos, 52 filas sin pasajeros que cuento como 0 y dejo marcadas, ciudades escritas de dos formas ("CALI" y "SANTIAGO DE CALI"), una misma aerolínea con varios nombres y rutas sin dirección (Bogotá - Medellín suma los dos sentidos).
-3. **Consultas:** 11 consultas de análisis en archivos `.sql` numerados y comentados (incluye un informe de calidad de datos y el pronóstico), con CTE y funciones de ventana (`rank`, `lag`, participaciones y acumulados).
-4. **Pruebas:** 37 pruebas que corren en GitHub Actions con cada cambio, y 2 más que se corren a mano y comparan contra la API en vivo. Revisan que los totales por año cuadren con los que calcula la propia API, que la limpieza no pierda ni duplique filas y que cada cifra de este README salga de los datos.
-5. **Power BI:** Power Query lee la misma copia y la limpia con los mismos pasos. Encima van las medidas DAX y las cinco páginas.
+3. **Consultas:** 10 consultas de análisis en archivos `.sql` numerados y comentados (incluye un informe de calidad de datos y el pronóstico), con CTE y funciones de ventana (`rank`, `lag`, participaciones y acumulados).
+4. **Pruebas:** 38 pruebas que corren en GitHub Actions con cada cambio, y 2 más que se corren a mano y comparan contra la API en vivo. Revisan que los totales por año cuadren con los que calcula la propia API, que la limpieza no pierda ni duplique filas y que cada cifra de este README salga de los datos.
+5. **Power BI:** Power Query lee la misma copia y la limpia con los mismos pasos. Encima van las medidas DAX y las seis páginas.
 
 El plan y las preguntas los definí yo. El código lo escribió Claude (IA) y yo revisé cada cifra contra la fuente.
 
 ```
-sql/          consultas numeradas (01 cargar, 02 limpiar, 10 a 19 análisis, 99 cifras del README)
-scripts/      descargar_datos.py y correr_sql.py
+sql/          consultas numeradas (01 cargar, 02 limpiar, 10 a 20 análisis y calidad, 99 cifras del README)
+scripts/      descargar_datos.py, correr_sql.py y coordenadas_aeropuertos.py
 tests/        pruebas con pytest
 datos/fuente/ copia fija de Aerocivil en Parquet (6 MB) y sus totales oficiales
+datos/referencia/ coordenadas de los aeropuertos (OurAirports)
 resultados/   lo que devuelve cada consulta, en CSV
-powerbi/      el tablero (.pbix)
+powerbi/      el tablero como proyecto de Power BI en texto (.pbip)
 powerquery/   la limpieza de Power Query, en texto
 dax/          las medidas DAX, en texto
 capturas/     imágenes del tablero
@@ -104,7 +107,7 @@ python scripts/correr_sql.py  # vuelve a calcular resultados/
 
 Para bajar los datos más recientes de Aerocivil: `python scripts/descargar_datos.py` (unos 2 minutos). Para comparar la copia contra la API en vivo: `python -m pytest -m en_linea`.
 
-Para abrir el tablero: Power BI Desktop (gratis). En Power Query cambia el parámetro `CarpetaDatos` a la carpeta `datos/fuente` de tu copia del repo y pulsa **Actualizar**.
+Para abrir el tablero: Power BI Desktop (gratis). Abre `powerbi/vuelos-colombia.pbip`, cambia en Power Query el parámetro `CarpetaDatos` a la carpeta `datos` de tu copia del repo y pulsa **Actualizar**.
 
 ## Qué le falta
 

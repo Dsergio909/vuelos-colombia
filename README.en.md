@@ -30,7 +30,7 @@ One more: on regular domestic flights planes are 81.5% full (2025), based on the
 
 ## The dashboard
 
-Five pages, one per question. One accent color and the filters on top (year, domestic or international, airline).
+Five pages, one per question, plus a sixth control page that shows the totals by year so they can be checked against the SQL. One accent color and two filters on top: year and traffic (domestic or international).
 
 | Page | What it answers |
 |---|---|
@@ -63,25 +63,28 @@ Things to keep in mind:
 - **Cargo includes mail**, because that's how Aerocivil reports it.
 - I added the brand name for the big airlines (for example, AIRES is LATAM Colombia and FAST COLOMBIA was Viva Air) in a short list inside [sql/02_limpiar.sql](sql/02_limpiar.sql). The rest use the name they report.
 
+Airport coordinates for the map come from [OurAirports](https://ourairports.com/data/) (public domain), matched by IATA code in [scripts/coordenadas_aeropuertos.py](scripts/coordenadas_aeropuertos.py).
+
 Derived data in this repo (the copy in `datos/fuente/` and the CSVs in `resultados/`) keeps the same CC BY-SA 4.0 license. The code is MIT.
 
 ## How I built it
 
 1. **Data:** a script downloads both datasets from the datos.gov.co API (no key, 50,000 rows per page, with retries) and checks that every row arrived.
 2. **Cleaning in SQL (DuckDB):** types, 52 rows with no passengers that I count as 0 and flag, cities written two ways ("CALI" and "SANTIAGO DE CALI"), one airline with several names, and routes without direction (Bogotá - Medellín adds both ways).
-3. **Queries:** 11 analysis queries in numbered, commented `.sql` files (including a data quality report and the forecast), with CTEs and window functions (`rank`, `lag`, shares and running totals).
-4. **Tests:** 37 tests that run on GitHub Actions on every change, plus 2 that run on demand against the live API. They check that yearly totals match the ones the API itself calculates, that cleaning doesn't lose or duplicate rows and that every number in this README comes from the data.
-5. **Power BI:** Power Query reads the same copy and cleans it with the same steps. DAX measures and the five pages go on top.
+3. **Queries:** 10 analysis queries in numbered, commented `.sql` files (including a data quality report and the forecast), with CTEs and window functions (`rank`, `lag`, shares and running totals).
+4. **Tests:** 38 tests that run on GitHub Actions on every change, plus 2 that run on demand against the live API. They check that yearly totals match the ones the API itself calculates, that cleaning doesn't lose or duplicate rows and that every number in this README comes from the data.
+5. **Power BI:** Power Query reads the same copy and cleans it with the same steps. DAX measures and the six pages go on top.
 
 I defined the plan and the questions. The code was written by Claude (AI) and I checked every number against the source.
 
 ```
-sql/          numbered queries (01 load, 02 clean, 10 to 19 analysis, 99 README numbers)
-scripts/      descargar_datos.py (download) and correr_sql.py (run queries)
+sql/          numbered queries (01 load, 02 clean, 10 to 20 analysis and quality, 99 README numbers)
+scripts/      descargar_datos.py (download), correr_sql.py (run queries) and coordenadas_aeropuertos.py (map)
 tests/        pytest tests
 datos/fuente/ fixed copy of the Aerocivil data in Parquet (6 MB) and its official totals
+datos/referencia/ airport coordinates (OurAirports)
 resultados/   what each query returns, as CSV
-powerbi/      the dashboard (.pbix)
+powerbi/      the dashboard as a Power BI project in text (.pbip)
 powerquery/   the Power Query cleaning, as text
 dax/          the DAX measures, as text
 capturas/     dashboard screenshots
@@ -104,7 +107,7 @@ python scripts/correr_sql.py  # recalculates resultados/
 
 To download the latest Aerocivil data: `python scripts/descargar_datos.py` (about 2 minutes). To compare the copy against the live API: `python -m pytest -m en_linea`.
 
-To open the dashboard: Power BI Desktop (free). In Power Query, set the `CarpetaDatos` parameter to the `datos/fuente` folder of your copy of the repo and click **Refresh**.
+To open the dashboard: Power BI Desktop (free). Open `powerbi/vuelos-colombia.pbip`, set the `CarpetaDatos` parameter in Power Query to the `datos` folder of your copy of the repo and click **Refresh**.
 
 ## What's missing
 
