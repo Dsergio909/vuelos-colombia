@@ -1,5 +1,5 @@
 -- 02_limpiar.sql
--- Limpia los datos crudos y arma el modelo que usan las consultas 10 a 16.
+-- Limpia los datos crudos y arma el modelo que usan las consultas 10 a 18.
 --
 -- Que se corrige y por que:
 --   1. Tipos: año, mes, pasajeros y carga llegan como texto. Se convierten con
@@ -12,9 +12,12 @@
 --      por aeropuerto y se acortan los nombres oficiales largos.
 --   5. Aerolineas: una misma sigla OACI trae nombres distintos ("COPA" y
 --      "COPA AIRLINES"). Se usa el nombre del ultimo mes reportado.
---   6. Alcance: el trafico "E" (Especial) son vuelos entre dos paises extranjeros
---      (por ejemplo Panama - La Habana). No es trafico de Colombia: queda en la
---      tabla pero se marca con es_colombia = false y las consultas lo excluyen.
+--   6. Paises: llegan con y sin tilde ("PANAMA" y "PANAMÁ", "ESPAÑA" y "ESPANA").
+--      Se quitan las tildes para que cada pais quede una sola vez.
+--   7. Alcance: el trafico "E" (Especial) son vuelos entre dos paises extranjeros
+--      (por ejemplo Panama - La Habana). Tampoco cuentan 10 filas de carga marcadas
+--      como internacionales que no tocan Colombia (por ejemplo Montevideo - Ezeiza).
+--      Quedan en la tabla con es_colombia = false y las consultas las excluyen.
 --
 -- No se borran filas repetidas: 73 combinaciones de aerolinea, mes, ruta y tipo
 -- de vuelo aparecen dos veces, a veces con cifras distintas (reportes separados).
@@ -53,9 +56,9 @@ select
     make_date(try_cast(a_o as integer), try_cast(n_mero_de_mes as integer), 1) as fecha_mes,
     upper(trim(sigla_empresa))                                 as sigla,
     upper(trim(origen))                                        as origen,
-    upper(trim(pais_origen))                                   as pais_origen,
+    upper(strip_accents(trim(pais_origen)))                    as pais_origen,
     upper(trim(destino))                                       as destino,
-    upper(trim(pais_destino))                                  as pais_destino,
+    upper(strip_accents(trim(pais_destino)))                   as pais_destino,
     case tr_fico_n_i when 'N' then 'Nacional' when 'I' then 'Internacional'
                      when 'E' then 'Especial' end              as trafico,
     case tipo_vuelo when 'R' then 'Regular' when 'T' then 'Taxi aereo'
@@ -64,7 +67,9 @@ select
     coalesce(try_cast(pasajeros as bigint), 0)                 as pasajeros,
     pasajeros is null                                          as pasajeros_vacio,
     coalesce(try_cast(carga_correo_kg as double), 0)           as carga_kg,
-    tr_fico_n_i in ('N', 'I')                                  as es_colombia,
+    tr_fico_n_i in ('N', 'I')
+        and 'COLOMBIA' in (upper(strip_accents(trim(pais_origen))),
+                           upper(strip_accents(trim(pais_destino)))) as es_colombia,
     -- ciudad cruda sin tildes (para armar la tabla de aeropuertos)
     upper(strip_accents(trim(ciudad_origen)))                  as ciudad_origen_cruda,
     upper(strip_accents(trim(ciudad_destino)))                 as ciudad_destino_cruda,
@@ -74,9 +79,9 @@ from crudo_od;
 -- Aeropuertos: un codigo + pais con su ciudad mas frecuente
 create or replace table aeropuertos as
 with apariciones as (
-    select origen as codigo, pais_origen as pais, ciudad_origen_cruda as ciudad from od
+    select origen as codigo, pais_origen as pais, ciudad_origen_cruda as ciudad from od where es_colombia
     union all
-    select destino, pais_destino, ciudad_destino_cruda from od
+    select destino, pais_destino, ciudad_destino_cruda from od where es_colombia
 ),
 conteo as (
     select codigo, pais, ciudad, count(*) as n
@@ -183,5 +188,7 @@ select
     coalesce(try_cast(pasajeros_a_bordo as bigint), 0)    as pasajeros_a_bordo,
     coalesce(try_cast(carga_ofrecida_kg as double), 0)    as carga_ofrecida_kg,
     coalesce(try_cast(carga_correo_a_bordo_kg as double), 0) as carga_a_bordo_kg,
-    tr_fico in ('N', 'I')                            as es_colombia
+    tr_fico in ('N', 'I')
+        and 'COLOMBIA' in (upper(strip_accents(trim(pais_origen))),
+                           upper(strip_accents(trim(pais_destino)))) as es_colombia
 from crudo_eq;

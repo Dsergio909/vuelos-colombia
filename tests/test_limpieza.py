@@ -26,12 +26,25 @@ def test_sin_negativos(con):
     ).fetchone()[0] == 0
 
 
-def test_alcance_colombia_excluye_solo_el_trafico_especial(con):
+def test_alcance_colombia(con):
+    # Fuera: el trafico Especial (entre dos paises extranjeros) y 10 filas de carga
+    # marcadas como internacionales que no tocan Colombia. Nada mas.
     total = con.execute("select count(*) from od").fetchone()[0]
     colombia = con.execute("select count(*) from v_od").fetchone()[0]
     especial = con.execute("select count(*) from od where trafico = 'Especial'").fetchone()[0]
-    assert colombia + especial == total
-    assert especial == 12_240
+    sin_colombia = con.execute(
+        "select count(*) from od where trafico <> 'Especial' and 'COLOMBIA' not in (pais_origen, pais_destino)"
+    ).fetchone()[0]
+    assert (especial, sin_colombia) == (12_240, 10)
+    assert colombia + especial + sin_colombia == total
+    assert con.execute("select sum(pasajeros) from od where trafico <> 'Especial' and not es_colombia").fetchone()[0] == 0
+
+
+def test_paises_sin_tildes_duplicadas(con):
+    # "PANAMA" y "PANAMÁ" deben quedar como un solo pais
+    assert con.execute(
+        "select count(*) from (select distinct pais_origen from od) where pais_origen <> strip_accents(pais_origen)"
+    ).fetchone()[0] == 0
 
 
 def test_la_vista_no_duplica_filas(con):

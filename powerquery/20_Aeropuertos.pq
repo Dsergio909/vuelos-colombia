@@ -1,14 +1,15 @@
 // Dimensión de aeropuertos: un código + país, con su ciudad y sus coordenadas.
 // El mismo aeropuerto aparece como "CALI" y "SANTIAGO DE CALI": se toma el nombre más usado.
 let
-    Base = Table.SelectRows(OD_crudo, each [tr_fico_n_i] = "N" or [tr_fico_n_i] = "I"),
+    Base = Table.SelectRows(OD_crudo, each ([tr_fico_n_i] = "N" or [tr_fico_n_i] = "I")
+        and (fnQuitarTildes([pais_origen]) = "COLOMBIA" or fnQuitarTildes([pais_destino]) = "COLOMBIA")),
     Origenes = Table.RenameColumns(Table.SelectColumns(Base, {"origen", "pais_origen", "ciudad_origen"}),
         {{"origen", "Código"}, {"pais_origen", "País"}, {"ciudad_origen", "Ciudad"}}),
     Destinos = Table.RenameColumns(Table.SelectColumns(Base, {"destino", "pais_destino", "ciudad_destino"}),
         {{"destino", "Código"}, {"pais_destino", "País"}, {"ciudad_destino", "Ciudad"}}),
     Todos = Table.Combine({Origenes, Destinos}),
     Limpios = Table.TransformColumns(Todos, {{"Código", each Text.Upper(Text.Trim(_)), type text},
-        {"País", each Text.Upper(Text.Trim(_)), type text}, {"Ciudad", fnQuitarTildes, type text}}),
+        {"País", fnQuitarTildes, type text}, {"Ciudad", fnQuitarTildes, type text}}),
     Conteo = Table.Group(Limpios, {"Código", "País", "Ciudad"}, {{"Filas", each Table.RowCount(_), Int64.Type}}),
     // El nombre más usado; si empatan, el primero en orden alfabético (igual que en SQL)
     Ordenado = Table.Buffer(Table.Sort(Conteo, {{"Código", Order.Ascending}, {"País", Order.Ascending},

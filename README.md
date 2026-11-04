@@ -56,7 +56,7 @@ Lo que hay que tener en cuenta:
 - **Las cifras de 2022 a 2025 son provisionales.** Aerocivil las puede corregir. Por eso el repo trae una copia fija, bajada el 4 de noviembre de 2026, y una prueba que avisa si la fuente cambió.
 - **2026 llega hasta junio.** No se compara 2026 contra años completos.
 - **2020 y 2021 están deformados por la pandemia** (de abril a agosto de 2020 casi no hubo vuelos de pasajeros). Las temporadas se calculan con 2022 a 2025.
-- **Solo tráfico de Colombia.** Quité 12.240 filas de tráfico "Especial": vuelos entre dos países extranjeros, como Panamá - La Habana, que hace una aerolínea colombiana.
+- **Solo tráfico de Colombia.** Quité 12.240 filas de tráfico "Especial": vuelos entre dos países extranjeros, como Panamá - La Habana, que hace una aerolínea colombiana. También quité 10 filas de carga marcadas como internacionales que no tocan Colombia (Montevideo - Ezeiza, por ejemplo).
 - **Carga incluye correo**, porque así la reporta Aerocivil.
 - La marca comercial de cada aerolínea (por ejemplo, AIRES es LATAM Colombia y FAST COLOMBIA era Viva Air) la puse yo, en una lista corta dentro de [sql/02_limpiar.sql](sql/02_limpiar.sql). Las demás aerolíneas usan el nombre que reportan.
 

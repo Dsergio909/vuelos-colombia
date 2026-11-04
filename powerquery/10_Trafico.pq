@@ -10,13 +10,15 @@ let
         {"sigla_empresa", "Sigla"}, {"a_o", "Año"}, {"n_mero_de_mes", "Mes"}, {"origen", "Origen"},
         {"pais_origen", "País origen"}, {"destino", "Destino"}, {"pais_destino", "País destino"},
         {"tr_fico_n_i", "Tráfico"}, {"tipo_vuelo", "Tipo de vuelo"}, {"pasajeros", "Pasajeros"}, {"carga_correo_kg", "Carga kg"}}),
-    // 2. Códigos y países sin espacios y en mayúsculas
+    // 2. Códigos sin espacios y en mayúsculas. Países también sin tildes: llegan "PANAMA" y "PANAMÁ"
     Textos = Table.TransformColumns(Nombres, {
         {"Sigla", each Text.Upper(Text.Trim(_)), type text}, {"Origen", each Text.Upper(Text.Trim(_)), type text},
-        {"Destino", each Text.Upper(Text.Trim(_)), type text}, {"País origen", each Text.Upper(Text.Trim(_)), type text},
-        {"País destino", each Text.Upper(Text.Trim(_)), type text}}),
+        {"Destino", each Text.Upper(Text.Trim(_)), type text}, {"País origen", fnQuitarTildes, type text},
+        {"País destino", fnQuitarTildes, type text}}),
+    // 10 filas de carga dicen "internacional" pero no tocan Colombia (por ejemplo Montevideo - Ezeiza): fuera
+    TocaColombia = Table.SelectRows(Textos, each [País origen] = "COLOMBIA" or [País destino] = "COLOMBIA"),
     // 3. Tipos. Los números vienen con punto decimal: se leen con cultura en-US
-    Tipos = Table.TransformColumnTypes(Textos, {{"Año", Int64.Type}, {"Mes", Int64.Type},
+    Tipos = Table.TransformColumnTypes(TocaColombia, {{"Año", Int64.Type}, {"Mes", Int64.Type},
         {"Pasajeros", Int64.Type}, {"Carga kg", type number}}, "en-US"),
     // 4. 52 filas sin pasajeros (casi todas de taxi aéreo con carga): cuentan como 0
     PasajerosVacios = Table.ReplaceValue(Tipos, null, 0, Replacer.ReplaceValue, {"Pasajeros"}),
@@ -32,9 +34,15 @@ let
     Sentido = Table.AddColumn(Ruta, "Sentido",
         each if [Tráfico] = "Nacional" then "Nacional"
              else if [País origen] = "COLOMBIA" then "Sale de Colombia" else "Entra a Colombia", type text),
+    // Para mostrar el país con sus tildes
+    ConTildes = [ESPANA = "España", MEXICO = "México", PERU = "Perú", PANAMA = "Panamá", CANADA = "Canadá",
+        #"REPUBLICA DOMINICANA" = "República Dominicana", #"ESTADOS UNIDOS" = "Estados Unidos",
+        #"ANTILLAS HOLANDESAS" = "Antillas Holandesas (Aruba y Curazao)", HAITI = "Haití", BELGICA = "Bélgica",
+        #"EMIRATOS ARABES UNIDOS" = "Emiratos Árabes Unidos", TURQUIA = "Turquía", ALEMANIA = "Alemania"],
     PaisExterior = Table.AddColumn(Sentido, "País exterior",
         each if [Tráfico] = "Nacional" then null
-             else Text.Proper(if [País origen] = "COLOMBIA" then [País destino] else [País origen]), type text),
+             else let p = if [País origen] = "COLOMBIA" then [País destino] else [País origen]
+                  in Record.FieldOrDefault(ConTildes, p, Text.Proper(p)), type text),
     // Claves para unir con Aeropuertos (el mismo código puede existir en dos países)
     ClaveOrigen = Table.AddColumn(PaisExterior, "Clave origen", each [Origen] & "|" & [País origen], type text),
     ClaveDestino = Table.AddColumn(ClaveOrigen, "Clave destino", each [Destino] & "|" & [País destino], type text),

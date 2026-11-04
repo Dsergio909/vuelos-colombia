@@ -1,0 +1,29 @@
+table TipoTrafico
+	lineageTag: d148131a-a987-5c4b-8323-57dd33d9cf17
+
+	column 'Tráfico'
+		dataType: string
+		lineageTag: 27e74737-2ccb-5c50-9f18-1af9edb15ca3
+		summarizeBy: none
+		sourceColumn: Tráfico
+		sortByColumn: Orden
+
+		annotation SummarizationSetBy = User
+
+	column Orden
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: b1eae5d0-cecb-5d7d-931f-199b42aa3759
+		summarizeBy: none
+		sourceColumn: Orden
+
+		annotation SummarizationSetBy = User
+
+	partition TipoTrafico = m
+		mode: import
+		source =
+				// Tabla pequeña para el filtro de nacional o internacional (filtra las dos tablas de hechos).
+				#table(type table [Tráfico = text, Orden = Int64.Type], {{"Nacional", 1}, {"Internacional", 2}})
+
+	annotation PBI_ResultType = Table

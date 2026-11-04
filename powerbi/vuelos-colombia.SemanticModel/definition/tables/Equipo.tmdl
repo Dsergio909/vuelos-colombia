@@ -1,0 +1,139 @@
+table Equipo
+	lineageTag: 7a1f994e-b4f8-50b1-bd8a-c8bfe2bf7caf
+
+	column Fecha
+		dataType: dateTime
+		formatString: mmm yyyy
+		isHidden
+		lineageTag: 8d962aec-3916-5694-b2fb-3b433f0ae7bf
+		summarizeBy: none
+		sourceColumn: Fecha
+
+		annotation SummarizationSetBy = User
+
+	column Sigla
+		dataType: string
+		isHidden
+		lineageTag: d4cf50f7-a7de-5750-a77c-ef7502db4d78
+		summarizeBy: none
+		sourceColumn: Sigla
+
+		annotation SummarizationSetBy = User
+
+	column Ruta
+		dataType: string
+		isHidden
+		lineageTag: 3e1c2c8f-3621-5f36-ac23-ef73e321dc83
+		summarizeBy: none
+		sourceColumn: Ruta
+
+		annotation SummarizationSetBy = User
+
+	column 'Tráfico'
+		dataType: string
+		isHidden
+		lineageTag: 3c3bf72b-bb9d-5faa-b13d-d7bee237d600
+		summarizeBy: none
+		sourceColumn: Tráfico
+
+		annotation SummarizationSetBy = User
+
+	column 'Tipo de vuelo'
+		dataType: string
+		isHidden
+		lineageTag: 66d17e92-b133-55d7-b3d4-e01799247681
+		summarizeBy: none
+		sourceColumn: Tipo de vuelo
+
+		annotation SummarizationSetBy = User
+
+	column Vuelos
+		dataType: int64
+		formatString: #,0
+		isHidden
+		lineageTag: eb566bc0-0759-516b-82cb-d7ea0e4594bf
+		summarizeBy: sum
+		sourceColumn: Vuelos
+
+		annotation SummarizationSetBy = User
+
+	column Sillas
+		dataType: int64
+		formatString: #,0
+		isHidden
+		lineageTag: 7e08d94c-37d4-5657-a81d-72bece9e0db1
+		summarizeBy: sum
+		sourceColumn: Sillas
+
+		annotation SummarizationSetBy = User
+
+	column 'Pasajeros a bordo'
+		dataType: int64
+		formatString: #,0
+		isHidden
+		lineageTag: bab0b90b-f3ed-5ea0-bf08-3c0ae663edae
+		summarizeBy: sum
+		sourceColumn: Pasajeros a bordo
+
+		annotation SummarizationSetBy = User
+
+	column 'Pasajeros con sillas'
+		dataType: int64
+		formatString: #,0
+		isHidden
+		lineageTag: a2c10bdb-3993-5c39-b8da-d40ed6c4a7b7
+		summarizeBy: sum
+		sourceColumn: Pasajeros con sillas
+
+		annotation SummarizationSetBy = User
+
+	column 'Carga a bordo kg'
+		dataType: double
+		formatString: #,0
+		isHidden
+		lineageTag: a44735ae-693b-5edd-97a1-3818ee5f3bcc
+		summarizeBy: sum
+		sourceColumn: Carga a bordo kg
+
+		annotation SummarizationSetBy = User
+
+	partition Equipo = m
+		mode: import
+		source =
+				// Tabla de hechos: vuelos, sillas y pasajeros a bordo (para la ocupación).
+				// Se agrupa por mes, aerolínea, ruta, tráfico y tipo de vuelo para que pese menos.
+				let
+				    Origen = EQ_crudo,
+				    SoloColombia = Table.SelectRows(Origen, each [tr_fico] = "N" or [tr_fico] = "I"),
+				    TocaColombia = Table.SelectRows(SoloColombia,
+				        each fnQuitarTildes([pais_origen]) = "COLOMBIA" or fnQuitarTildes([pais_destino]) = "COLOMBIA"),
+				    Columnas = Table.SelectColumns(TocaColombia, {"a_o", "mes", "sigla_empresa", "origen", "destino", "tr_fico",
+				        "tipo_vuelo", "n_mero_de_vuelos", "sillas_ofrecidas", "pasajeros_a_bordo", "carga_correo_a_bordo_kg"}),
+				    Tipos = Table.TransformColumnTypes(Columnas, {{"a_o", Int64.Type}, {"mes", Int64.Type},
+				        {"n_mero_de_vuelos", Int64.Type}, {"sillas_ofrecidas", Int64.Type}, {"pasajeros_a_bordo", Int64.Type},
+				        {"carga_correo_a_bordo_kg", type number}}, "en-US"),
+				    Vacios = Table.ReplaceValue(Tipos, null, 0, Replacer.ReplaceValue,
+				        {"n_mero_de_vuelos", "sillas_ofrecidas", "pasajeros_a_bordo", "carga_correo_a_bordo_kg"}),
+				    Codigos = Table.TransformColumns(Vacios, {{"sigla_empresa", each Text.Upper(Text.Trim(_)), type text},
+				        {"origen", each Text.Upper(Text.Trim(_)), type text}, {"destino", each Text.Upper(Text.Trim(_)), type text}}),
+				    Fecha = Table.AddColumn(Codigos, "Fecha", each #date([a_o], [mes], 1), type date),
+				    Ruta = Table.AddColumn(Fecha, "Ruta",
+				        each if [origen] < [destino] then [origen] & "-" & [destino] else [destino] & "-" & [origen], type text),
+				    Palabras = Table.TransformColumns(Ruta, {
+				        {"tr_fico", each if _ = "N" then "Nacional" else "Internacional", type text},
+				        {"tipo_vuelo", each Record.FieldOrDefault(
+				            [R = "Regular", T = "Taxi aéreo", C = "Chárter", A = "Adicional", N = "No regular"], _, _), type text}}),
+				    // La ocupación solo usa filas con sillas reportadas (los taxis aéreos reportan 0 sillas)
+				    ConSillas = Table.AddColumn(Palabras, "pax_con_sillas",
+				        each if [sillas_ofrecidas] > 0 then [pasajeros_a_bordo] else 0, Int64.Type),
+				    Agrupado = Table.Group(ConSillas, {"Fecha", "sigla_empresa", "Ruta", "tr_fico", "tipo_vuelo"}, {
+				        {"Vuelos", each List.Sum([n_mero_de_vuelos]), Int64.Type},
+				        {"Sillas", each List.Sum([sillas_ofrecidas]), Int64.Type},
+				        {"Pasajeros a bordo", each List.Sum([pasajeros_a_bordo]), Int64.Type},
+				        {"Pasajeros con sillas", each List.Sum([pax_con_sillas]), Int64.Type},
+				        {"Carga a bordo kg", each List.Sum([carga_correo_a_bordo_kg]), type number}}),
+				    Final = Table.RenameColumns(Agrupado, {{"sigla_empresa", "Sigla"}, {"tr_fico", "Tráfico"}, {"tipo_vuelo", "Tipo de vuelo"}})
+				in
+				    Final
+
+	annotation PBI_ResultType = Table

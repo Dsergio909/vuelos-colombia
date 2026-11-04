@@ -28,8 +28,10 @@ let
         "m", {"Marca", "Grupo"}),
     Nombres = Table.AddColumn(Unido, "Aerolínea", each if [Marca] = null then Text.Proper([nombre]) else [Marca], type text),
     Grupo = Table.AddColumn(Nombres, "Grupo empresarial", each if [Grupo] = null then [Aerolínea] else [Grupo], type text),
-    // Para las gráficas: los grupos con marca propia y "Otras" para el resto
-    GrupoTablero = Table.AddColumn(Grupo, "Grupo tablero", each if [Grupo] = null then "Otras" else [Grupo], type text),
+    // Para la gráfica del mercado nacional: los grupos que vuelan dentro de Colombia y "Otras" para el resto
+    Nacionales = {"Grupo Avianca", "Grupo LATAM", "Viva Air", "Ultra Air", "JetSMART", "Wingo", "EasyFly", "Satena"},
+    GrupoTablero = Table.AddColumn(Grupo, "Grupo tablero",
+        each if List.Contains(Nacionales, [Grupo empresarial]) then [Grupo empresarial] else "Otras", type text),
     Final = Table.RenameColumns(Table.SelectColumns(GrupoTablero,
         {"sigla_empresa", "nombre", "Aerolínea", "Grupo empresarial", "Grupo tablero"}),
         {{"sigla_empresa", "Sigla"}, {"nombre", "Nombre reportado"}})

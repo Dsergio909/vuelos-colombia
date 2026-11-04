@@ -1,0 +1,177 @@
+table Trafico
+	lineageTag: 292cba99-3ab8-5153-b7c7-b9ad06652971
+
+	column Fecha
+		dataType: dateTime
+		formatString: mmm yyyy
+		isHidden
+		lineageTag: 04b799b5-08f7-5236-bb2e-92bb40ed4a36
+		summarizeBy: none
+		sourceColumn: Fecha
+
+		annotation SummarizationSetBy = User
+
+	column Sigla
+		dataType: string
+		isHidden
+		lineageTag: 1898aa43-280c-5b09-b1b3-7582bda6d431
+		summarizeBy: none
+		sourceColumn: Sigla
+
+		annotation SummarizationSetBy = User
+
+	column Ruta
+		dataType: string
+		isHidden
+		lineageTag: 668b9b92-5886-5717-8d31-19d161300726
+		summarizeBy: none
+		sourceColumn: Ruta
+
+		annotation SummarizationSetBy = User
+
+	column Origen
+		dataType: string
+		isHidden
+		lineageTag: db5b12d7-07fa-541f-aefe-69ddcac88cc5
+		summarizeBy: none
+		sourceColumn: Origen
+
+		annotation SummarizationSetBy = User
+
+	column Destino
+		dataType: string
+		isHidden
+		lineageTag: 43e6affa-11bb-5338-bf4d-0a1893a5c457
+		summarizeBy: none
+		sourceColumn: Destino
+
+		annotation SummarizationSetBy = User
+
+	column 'Clave origen'
+		dataType: string
+		isHidden
+		lineageTag: 604187fa-30e8-50bc-a097-eb35a8611c1f
+		summarizeBy: none
+		sourceColumn: Clave origen
+
+		annotation SummarizationSetBy = User
+
+	column 'Clave destino'
+		dataType: string
+		isHidden
+		lineageTag: 907b5093-ba22-56e7-8dee-6d83aa693381
+		summarizeBy: none
+		sourceColumn: Clave destino
+
+		annotation SummarizationSetBy = User
+
+	column 'Tráfico'
+		dataType: string
+		isHidden
+		lineageTag: 489ce5ca-11f7-54af-8108-95b708765076
+		summarizeBy: none
+		sourceColumn: Tráfico
+
+		annotation SummarizationSetBy = User
+
+	column 'Tipo de vuelo'
+		dataType: string
+		lineageTag: cf9ca93f-80be-5ea9-936f-66896cca7c18
+		summarizeBy: none
+		sourceColumn: Tipo de vuelo
+
+		annotation SummarizationSetBy = User
+
+	column Sentido
+		dataType: string
+		lineageTag: 07446cbb-d0f0-5897-9bed-914858411b5f
+		summarizeBy: none
+		sourceColumn: Sentido
+
+		annotation SummarizationSetBy = User
+
+	column 'País exterior'
+		dataType: string
+		lineageTag: 4cec5ab8-5542-5247-9df5-8527de43c95f
+		summarizeBy: none
+		sourceColumn: País exterior
+
+		annotation SummarizationSetBy = User
+
+	column Pasajeros
+		dataType: int64
+		formatString: #,0
+		isHidden
+		lineageTag: 57ad714d-9824-5e62-82cc-fbd90671b68a
+		summarizeBy: sum
+		sourceColumn: Pasajeros
+
+		annotation SummarizationSetBy = User
+
+	column 'Carga kg'
+		dataType: double
+		formatString: #,0
+		isHidden
+		lineageTag: a1d9e48e-26bf-59ea-8765-f10ff8173a4f
+		summarizeBy: sum
+		sourceColumn: Carga kg
+
+		annotation SummarizationSetBy = User
+
+	partition Trafico = m
+		mode: import
+		source =
+				// Tabla de hechos: una fila por aerolínea, mes, ruta, tráfico y tipo de vuelo.
+				// Mismos pasos que sql/02_limpiar.sql.
+				let
+				    Origen = OD_crudo,
+				    // 1. Solo tráfico de Colombia: N (nacional) e I (internacional). La E (especial) son vuelos entre dos países extranjeros.
+				    SoloColombia = Table.SelectRows(Origen, each [tr_fico_n_i] = "N" or [tr_fico_n_i] = "I"),
+				    Columnas = Table.SelectColumns(SoloColombia, {"sigla_empresa", "a_o", "n_mero_de_mes", "origen", "pais_origen",
+				        "destino", "pais_destino", "tr_fico_n_i", "tipo_vuelo", "pasajeros", "carga_correo_kg"}),
+				    Nombres = Table.RenameColumns(Columnas, {
+				        {"sigla_empresa", "Sigla"}, {"a_o", "Año"}, {"n_mero_de_mes", "Mes"}, {"origen", "Origen"},
+				        {"pais_origen", "País origen"}, {"destino", "Destino"}, {"pais_destino", "País destino"},
+				        {"tr_fico_n_i", "Tráfico"}, {"tipo_vuelo", "Tipo de vuelo"}, {"pasajeros", "Pasajeros"}, {"carga_correo_kg", "Carga kg"}}),
+				    // 2. Códigos sin espacios y en mayúsculas. Países también sin tildes: llegan "PANAMA" y "PANAMÁ"
+				    Textos = Table.TransformColumns(Nombres, {
+				        {"Sigla", each Text.Upper(Text.Trim(_)), type text}, {"Origen", each Text.Upper(Text.Trim(_)), type text},
+				        {"Destino", each Text.Upper(Text.Trim(_)), type text}, {"País origen", fnQuitarTildes, type text},
+				        {"País destino", fnQuitarTildes, type text}}),
+				    // 10 filas de carga dicen "internacional" pero no tocan Colombia (por ejemplo Montevideo - Ezeiza): fuera
+				    TocaColombia = Table.SelectRows(Textos, each [País origen] = "COLOMBIA" or [País destino] = "COLOMBIA"),
+				    // 3. Tipos. Los números vienen con punto decimal: se leen con cultura en-US
+				    Tipos = Table.TransformColumnTypes(TocaColombia, {{"Año", Int64.Type}, {"Mes", Int64.Type},
+				        {"Pasajeros", Int64.Type}, {"Carga kg", type number}}, "en-US"),
+				    // 4. 52 filas sin pasajeros (casi todas de taxi aéreo con carga): cuentan como 0
+				    PasajerosVacios = Table.ReplaceValue(Tipos, null, 0, Replacer.ReplaceValue, {"Pasajeros"}),
+				    Fecha = Table.AddColumn(PasajerosVacios, "Fecha", each #date([Año], [Mes], 1), type date),
+				    // 5. Códigos de una letra a palabras
+				    Palabras = Table.TransformColumns(Fecha, {
+				        {"Tráfico", each if _ = "N" then "Nacional" else "Internacional", type text},
+				        {"Tipo de vuelo", each Record.FieldOrDefault(
+				            [R = "Regular", T = "Taxi aéreo", C = "Chárter", A = "Adicional", N = "No regular"], _, _), type text}}),
+				    // 6. Ruta sin dirección: BOG-MDE y MDE-BOG son la misma ruta
+				    Ruta = Table.AddColumn(Palabras, "Ruta",
+				        each if [Origen] < [Destino] then [Origen] & "-" & [Destino] else [Destino] & "-" & [Origen], type text),
+				    Sentido = Table.AddColumn(Ruta, "Sentido",
+				        each if [Tráfico] = "Nacional" then "Nacional"
+				             else if [País origen] = "COLOMBIA" then "Sale de Colombia" else "Entra a Colombia", type text),
+				    // Para mostrar el país con sus tildes
+				    ConTildes = [ESPANA = "España", MEXICO = "México", PERU = "Perú", PANAMA = "Panamá", CANADA = "Canadá",
+				        #"REPUBLICA DOMINICANA" = "República Dominicana", #"ESTADOS UNIDOS" = "Estados Unidos",
+				        #"ANTILLAS HOLANDESAS" = "Antillas Holandesas (Aruba y Curazao)", HAITI = "Haití", BELGICA = "Bélgica",
+				        #"EMIRATOS ARABES UNIDOS" = "Emiratos Árabes Unidos", TURQUIA = "Turquía", ALEMANIA = "Alemania"],
+				    PaisExterior = Table.AddColumn(Sentido, "País exterior",
+				        each if [Tráfico] = "Nacional" then null
+				             else let p = if [País origen] = "COLOMBIA" then [País destino] else [País origen]
+				                  in Record.FieldOrDefault(ConTildes, p, Text.Proper(p)), type text),
+				    // Claves para unir con Aeropuertos (el mismo código puede existir en dos países)
+				    ClaveOrigen = Table.AddColumn(PaisExterior, "Clave origen", each [Origen] & "|" & [País origen], type text),
+				    ClaveDestino = Table.AddColumn(ClaveOrigen, "Clave destino", each [Destino] & "|" & [País destino], type text),
+				    Final = Table.SelectColumns(ClaveDestino, {"Fecha", "Sigla", "Ruta", "Origen", "Destino", "Clave origen", "Clave destino",
+				        "Tráfico", "Tipo de vuelo", "Sentido", "País exterior", "Pasajeros", "Carga kg"})
+				in
+				    Final
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,20 @@
+model Model
+	culture: es-CO
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: es-CO
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBI_QueryOrder = ["CarpetaDatos", "fnQuitarTildes", "OD_crudo", "EQ_crudo", "Trafico", "Equipo", "Aeropuertos", "Rutas", "Aerolineas", "Calendario", "TipoTrafico"]
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+ref table Trafico
+ref table Equipo
+ref table Aeropuertos
+ref table Rutas
+ref table Aerolineas
+ref table Calendario
+ref table TipoTrafico
+ref table Medidas

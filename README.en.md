@@ -56,7 +56,7 @@ Things to keep in mind:
 - **Figures for 2022 to 2025 are provisional.** Aerocivil may correct them. That's why the repo has a fixed copy, downloaded on November 4, 2026, and a test that warns if the source changed.
 - **2026 only goes to June.** 2026 is not compared against full years.
 - **2020 and 2021 are distorted by the pandemic** (from April to August 2020 there were almost no passenger flights). Seasons are calculated with 2022 to 2025.
-- **Only traffic to, from or within Colombia.** I removed 12,240 rows of "Special" traffic: flights between two foreign countries, like Panama - Havana, run by a Colombian airline.
+- **Only traffic to, from or within Colombia.** I removed 12,240 rows of "Special" traffic: flights between two foreign countries, like Panama - Havana, run by a Colombian airline. I also removed 10 cargo rows marked as international that never touch Colombia (Montevideo - Ezeiza, for example).
 - **Cargo includes mail**, because that's how Aerocivil reports it.
 - I added the brand name for the big airlines (for example, AIRES is LATAM Colombia and FAST COLOMBIA was Viva Air) in a short list inside [sql/02_limpiar.sql](sql/02_limpiar.sql). The rest use the name they report.
 

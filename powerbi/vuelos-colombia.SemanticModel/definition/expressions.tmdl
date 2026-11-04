@@ -1,0 +1,45 @@
+expression CarpetaDatos = "C:\Trabajo\vuelos-colombia\datos" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	lineageTag: 7d6cbc9a-e13e-5c68-ab94-8a341e9b2f8a
+
+	annotation PBI_ResultType = Text
+
+expression fnQuitarTildes =
+		// Función: pasa a mayúsculas, quita espacios de los extremos y quita tildes.
+		// "Montería " y "MONTERIA" quedan iguales: "MONTERIA". Hace lo mismo que strip_accents de DuckDB.
+		(texto as nullable text) as nullable text =>
+		    if texto = null then null
+		    else
+		        let
+		            Pares = {
+		                {"Á", "A"}, {"É", "E"}, {"Í", "I"}, {"Ó", "O"}, {"Ú", "U"}, {"Ü", "U"}, {"Ñ", "N"},
+		                {"À", "A"}, {"È", "E"}, {"Ì", "I"}, {"Ò", "O"}, {"Ù", "U"},
+		                {"Â", "A"}, {"Ê", "E"}, {"Î", "I"}, {"Ô", "O"}, {"Û", "U"},
+		                {"Ã", "A"}, {"Õ", "O"}, {"Ç", "C"}, {"Ä", "A"}, {"Ë", "E"}, {"Ï", "I"}, {"Ö", "O"}
+		            },
+		            Mayusculas = Text.Upper(Text.Trim(texto)),
+		            SinTildes = List.Accumulate(Pares, Mayusculas, (t, par) => Text.Replace(t, par{0}, par{1}))
+		        in
+		            SinTildes
+	lineageTag: 52b5097d-aafb-530f-93b2-797df027180d
+
+	annotation PBI_ResultType = Function
+
+expression OD_crudo =
+		// Tráfico Origen-Destino tal como viene de Aerocivil (todo texto). No se carga al modelo.
+		let
+		    Origen = Parquet.Document(File.Contents(CarpetaDatos & "\fuente\origen_destino.parquet"))
+		in
+		    Origen
+	lineageTag: b2def2cc-455b-54ab-8b53-17aec561836d
+
+	annotation PBI_ResultType = Table
+
+expression EQ_crudo =
+		// Tráfico por Equipo tal como viene de Aerocivil (todo texto). No se carga al modelo.
+		let
+		    Origen = Parquet.Document(File.Contents(CarpetaDatos & "\fuente\equipo.parquet"))
+		in
+		    Origen
+	lineageTag: 2456e077-2b51-53db-bab6-51f0344f6f72
+
+	annotation PBI_ResultType = Table

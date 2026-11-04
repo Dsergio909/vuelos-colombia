@@ -1,0 +1,41 @@
+relationship 78037d7d-d2a4-59b3-9626-47a8231c3eab
+	fromColumn: Trafico.Fecha
+	toColumn: Calendario.Fecha
+
+relationship 73afc63e-7b9f-566e-bfca-a5447af13384
+	fromColumn: Equipo.Fecha
+	toColumn: Calendario.Fecha
+
+relationship 25cfd925-946b-53dc-8e4b-b9bc6b5e4a18
+	fromColumn: Trafico.Sigla
+	toColumn: Aerolineas.Sigla
+
+relationship 4b7af759-01cc-5080-a3a7-5f8cff29788c
+	fromColumn: Equipo.Sigla
+	toColumn: Aerolineas.Sigla
+
+relationship f2b3f59d-9f59-54f4-9320-c058678a27ca
+	fromColumn: Trafico.Ruta
+	toColumn: Rutas.Ruta
+
+relationship bbb32036-4cfa-5798-8081-0e454b4aaf22
+	fromColumn: Equipo.Ruta
+	toColumn: Rutas.Ruta
+
+relationship e3b735fa-77ef-5dee-b24f-46f41320c191
+	fromColumn: Trafico.'Tráfico'
+	toColumn: TipoTrafico.'Tráfico'
+
+relationship c749558b-8101-5569-b45a-21819059733d
+	fromColumn: Equipo.'Tráfico'
+	toColumn: TipoTrafico.'Tráfico'
+
+relationship 9e63e0f2-aa23-52a6-a41e-37459f4b1db0
+	isActive: false
+	fromColumn: Trafico.'Clave origen'
+	toColumn: Aeropuertos.Clave
+
+relationship 612d5984-a18f-54e7-9777-86b6c33d0580
+	isActive: false
+	fromColumn: Trafico.'Clave destino'
+	toColumn: Aeropuertos.Clave

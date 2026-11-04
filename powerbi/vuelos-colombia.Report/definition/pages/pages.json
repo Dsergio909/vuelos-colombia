@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/pagesMetadata/1.0.0/schema.json",
+  "pageOrder": [
+    "p1_resumen",
+    "p2_temporadas",
+    "p3_aerolineas",
+    "p4_nacional_internacional",
+    "p5_carga",
+    "p6_control"
+  ],
+  "activePageName": "p1_resumen"
+}

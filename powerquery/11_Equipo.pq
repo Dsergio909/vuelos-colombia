@@ -3,7 +3,9 @@
 let
     Origen = EQ_crudo,
     SoloColombia = Table.SelectRows(Origen, each [tr_fico] = "N" or [tr_fico] = "I"),
-    Columnas = Table.SelectColumns(SoloColombia, {"a_o", "mes", "sigla_empresa", "origen", "destino", "tr_fico",
+    TocaColombia = Table.SelectRows(SoloColombia,
+        each fnQuitarTildes([pais_origen]) = "COLOMBIA" or fnQuitarTildes([pais_destino]) = "COLOMBIA"),
+    Columnas = Table.SelectColumns(TocaColombia, {"a_o", "mes", "sigla_empresa", "origen", "destino", "tr_fico",
         "tipo_vuelo", "n_mero_de_vuelos", "sillas_ofrecidas", "pasajeros_a_bordo", "carga_correo_a_bordo_kg"}),
     Tipos = Table.TransformColumnTypes(Columnas, {{"a_o", Int64.Type}, {"mes", Int64.Type},
         {"n_mero_de_vuelos", Int64.Type}, {"sillas_ofrecidas", Int64.Type}, {"pasajeros_a_bordo", Int64.Type},

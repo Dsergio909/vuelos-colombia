@@ -1,0 +1,248 @@
+table Medidas
+	lineageTag: 81e57392-df4e-503b-a572-cb228eb3cfb3
+
+	/// Pasajeros de pago (dato de Aerocivil, conjunto Origen-Destino).
+	measure Pasajeros = SUM ( Trafico[Pasajeros] )
+		formatString: #,0
+		displayFolder: Base
+		lineageTag: 00bf2e15-0322-5190-8c52-0d6a6c846b3a
+
+	/// Carga más correo, en toneladas.
+	measure 'Carga (t)' = DIVIDE ( SUM ( Trafico[Carga kg] ), 1000 )
+		formatString: #,0
+		displayFolder: Base
+		lineageTag: 123f827d-6047-5d1a-b252-b9ba887fd919
+
+	/// Pasajeros de vuelos nacionales. Ignora el filtro de tráfico a propósito.
+	measure 'Pasajeros nacionales' = CALCULATE ( [Pasajeros], TipoTrafico[Tráfico] = "Nacional" )
+		formatString: #,0
+		displayFolder: Base
+		lineageTag: d6dc65ea-0645-5ebe-ae5a-d5ab5fdd44bc
+
+	/// Pasajeros de vuelos internacionales (salen o llegan a Colombia).
+	measure 'Pasajeros internacionales' = CALCULATE ( [Pasajeros], TipoTrafico[Tráfico] = "Internacional" )
+		formatString: #,0
+		displayFolder: Base
+		lineageTag: 137dd95d-bc00-5831-a908-917e1c2ce555
+
+	/// Parte de los pasajeros que vuela fuera del país.
+	measure '% internacional' = DIVIDE ( [Pasajeros internacionales], [Pasajeros nacionales] + [Pasajeros internacionales] )
+		formatString: 0.0%
+		displayFolder: Base
+		lineageTag: ab0fab01-d0b4-5b7e-b313-1751b70e106f
+
+	/// Los mismos meses del año anterior. Si se ve 2026 (enero a junio), compara contra enero a junio de 2025.
+	measure 'Pasajeros año anterior' =
+			VAR anio = MAX ( Calendario[Año] )
+			VAR meses = VALUES ( Calendario[Mes] )
+			RETURN
+			    IF (
+			        HASONEVALUE ( Calendario[Año] ),
+			        CALCULATE (
+			            [Pasajeros],
+			            REMOVEFILTERS ( Calendario ),
+			            Calendario[Año] = anio - 1,
+			            TREATAS ( meses, Calendario[Mes] )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: Comparación
+		lineageTag: 3e1327b5-a608-55a7-8978-04626b448b81
+
+	/// Cambio de pasajeros contra los mismos meses del año anterior.
+	measure 'Variación vs año anterior' = DIVIDE ( [Pasajeros] - [Pasajeros año anterior], [Pasajeros año anterior] )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Comparación
+		lineageTag: b06edf23-3b63-5421-bb33-1ebc8499ae88
+
+	/// Parte de los pasajeros nacionales que lleva cada aerolínea o grupo.
+	measure 'Participación nacional' = DIVIDE ( [Pasajeros nacionales], CALCULATE ( [Pasajeros nacionales], REMOVEFILTERS ( Aerolineas ) ) )
+		formatString: 0.0%
+		displayFolder: Aerolíneas
+		lineageTag: 615203da-9f92-5d39-ae4c-1b1169f488b5
+
+	/// Índice de Herfindahl-Hirschman: suma de las participaciones al cuadrado (de 0 a 10.000). Más de 2.500 es un mercado muy concentrado. Se calcula por grupo empresarial.
+	measure 'HHI nacional' =
+			SUMX (
+			    VALUES ( Aerolineas[Grupo empresarial] ),
+			    VAR s =
+			        100
+			            * DIVIDE (
+			                CALCULATE ( [Pasajeros nacionales] ),
+			                CALCULATE ( [Pasajeros nacionales], REMOVEFILTERS ( Aerolineas ) )
+			            )
+			    RETURN
+			        s * s
+			)
+		formatString: #,0
+		displayFolder: Aerolíneas
+		lineageTag: 8c8bb5e9-b3c1-5d1f-a286-239f33c99563
+
+	/// Pasajeros a bordo / sillas ofrecidas, en vuelos regulares con sillas reportadas (conjunto Tráfico por Equipo).
+	measure 'Ocupación' =
+			DIVIDE (
+			    CALCULATE ( SUM ( Equipo[Pasajeros con sillas] ), Equipo[Tipo de vuelo] = "Regular" ),
+			    CALCULATE ( SUM ( Equipo[Sillas] ), Equipo[Tipo de vuelo] = "Regular" )
+			)
+		formatString: 0.0%
+		displayFolder: Operación
+		lineageTag: 4dae9236-b782-5f50-9444-f7b10594e7b9
+
+	/// Número de vuelos (conjunto Tráfico por Equipo).
+	measure Vuelos = SUM ( Equipo[Vuelos] )
+		formatString: #,0
+		displayFolder: Operación
+		lineageTag: 9d1506ae-5c21-5ea5-901a-b569400fa6a6
+
+	/// Pasajeros que salen más los que llegan. Usa las dos relaciones inactivas con Aeropuertos.
+	measure 'Pasajeros por aeropuerto' =
+			CALCULATE ( [Pasajeros], USERELATIONSHIP ( Trafico[Clave origen], Aeropuertos[Clave] ) )
+			    + CALCULATE ( [Pasajeros], USERELATIONSHIP ( Trafico[Clave destino], Aeropuertos[Clave] ) )
+		formatString: #,0
+		displayFolder: Rutas
+		lineageTag: c2fce2a2-5e17-51ea-af9f-2df8e91637be
+
+	/// Pasajeros solo para las 10 rutas más grandes de lo que esté filtrado; el resto queda en blanco y no se dibuja.
+	measure 'Pasajeros top 10 rutas' =
+			IF (
+			    RANKX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Pasajeros],, DESC, DENSE ) <= 10,
+			    [Pasajeros]
+			)
+		formatString: #,0
+		displayFolder: Rutas
+		lineageTag: 9ae85b9c-4402-5a6b-a86a-13d6627633ee
+
+	/// Pasajeros internacionales de los 10 países con más viajeros.
+	measure 'Pasajeros internacionales top 10 países' =
+			IF (
+			    NOT ISBLANK ( [Pasajeros internacionales] )
+			        && RANKX ( ALLSELECTED ( Trafico[País exterior] ), [Pasajeros internacionales],, DESC, DENSE ) <= 10,
+			    [Pasajeros internacionales]
+			)
+		formatString: #,0
+		displayFolder: Rutas
+		lineageTag: b72a4353-e481-596e-870d-e81574e091d5
+
+	/// Pasajeros internacionales de las 10 rutas internacionales más grandes.
+	measure 'Pasajeros internacionales top 10 rutas' =
+			IF (
+			    NOT ISBLANK ( [Pasajeros internacionales] )
+			        && RANKX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Pasajeros internacionales],, DESC, DENSE ) <= 10,
+			    [Pasajeros internacionales]
+			)
+		formatString: #,0
+		displayFolder: Rutas
+		lineageTag: 8582c1d8-202e-5e06-ad30-0ad66c669863
+
+	/// Pasajeros del mes / promedio mensual de su año x 100, promediado de 2022 a 2025. 100 = un mes normal. Ignora el filtro de año: 2020 y 2021 tienen la pandemia y 2026 no está completo.
+	measure 'Índice de temporada' =
+			VAR anios =
+			    CALCULATETABLE (
+			        VALUES ( Calendario[Año] ),
+			        REMOVEFILTERS ( Calendario ),
+			        Calendario[Año] >= 2022,
+			        Calendario[Año] <= 2025
+			    )
+			VAR indices =
+			    ADDCOLUMNS (
+			        anios,
+			        "@indice",
+			            VAR a = Calendario[Año]
+			            VAR delMes = CALCULATE ( [Pasajeros], REMOVEFILTERS ( Calendario[Año], Calendario[Fecha] ), Calendario[Año] = a )
+			            VAR promedio = CALCULATE ( [Pasajeros], REMOVEFILTERS ( Calendario ), Calendario[Año] = a ) / 12
+			            RETURN DIVIDE ( delMes, promedio ) * 100
+			    )
+			RETURN
+			    AVERAGEX ( indices, [@indice] )
+		formatString: 0.0
+		displayFolder: Temporadas
+		lineageTag: 768a232a-3c3b-518a-babe-76d0e6f21819
+
+	/// El mes con el índice de temporada más alto.
+	measure 'Mes más fuerte' =
+			VAR meses = ADDCOLUMNS ( SUMMARIZE ( ALL ( Calendario ), Calendario[Mes], Calendario[Mes largo] ), "@i", [Índice de temporada] )
+			RETURN
+			    MAXX ( TOPN ( 1, meses, [@i], DESC ), Calendario[Mes largo] )
+		displayFolder: Temporadas
+		lineageTag: d34ce62a-eab4-5c29-9898-88ec8514e672
+
+	/// El mes con el índice de temporada más bajo.
+	measure 'Mes más flojo' =
+			VAR meses = ADDCOLUMNS ( SUMMARIZE ( ALL ( Calendario ), Calendario[Mes], Calendario[Mes largo] ), "@i", [Índice de temporada] )
+			RETURN
+			    MAXX ( TOPN ( 1, meses, [@i], ASC ), Calendario[Mes largo] )
+		displayFolder: Temporadas
+		lineageTag: 1a36158a-5ad5-5587-b902-ebfe8889743d
+
+	/// Toneladas en vuelos internacionales que salen de Colombia.
+	measure 'Carga que sale (t)' = CALCULATE ( [Carga (t)], Trafico[Sentido] = "Sale de Colombia" )
+		formatString: #,0
+		displayFolder: Carga
+		lineageTag: 8c17c4a2-a153-5a08-bd18-54fe94a47f39
+
+	/// Parte de las toneladas que va en vuelos internacionales.
+	measure '% carga internacional' =
+			DIVIDE (
+			    CALCULATE ( [Carga (t)], TipoTrafico[Tráfico] = "Internacional" ),
+			    CALCULATE ( [Carga (t)], REMOVEFILTERS ( TipoTrafico ) )
+			)
+		formatString: 0.0%
+		displayFolder: Carga
+		lineageTag: 556c48d3-1294-599f-88be-3bc1851b7900
+
+	/// Como el índice de temporada, pero con toneladas. 100 = un mes normal (2022 a 2025).
+	measure 'Índice de carga' =
+			VAR anios =
+			    CALCULATETABLE (
+			        VALUES ( Calendario[Año] ),
+			        REMOVEFILTERS ( Calendario ),
+			        Calendario[Año] >= 2022,
+			        Calendario[Año] <= 2025
+			    )
+			VAR indices =
+			    ADDCOLUMNS (
+			        anios,
+			        "@indice",
+			            VAR a = Calendario[Año]
+			            VAR delMes = CALCULATE ( [Carga (t)], REMOVEFILTERS ( Calendario[Año], Calendario[Fecha] ), Calendario[Año] = a )
+			            VAR promedio = CALCULATE ( [Carga (t)], REMOVEFILTERS ( Calendario ), Calendario[Año] = a ) / 12
+			            RETURN DIVIDE ( delMes, promedio ) * 100
+			    )
+			RETURN
+			    AVERAGEX ( indices, [@indice] )
+		formatString: 0.0
+		displayFolder: Carga
+		lineageTag: 8bd25b73-ae25-5e54-90da-7f84336d4eb7
+
+	/// Toneladas solo para las 10 rutas con más carga.
+	measure 'Carga top 10 rutas' =
+			IF (
+			    RANKX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Carga (t)],, DESC, DENSE ) <= 10,
+			    [Carga (t)]
+			)
+		formatString: #,0
+		displayFolder: Carga
+		lineageTag: 6facbc71-9572-5619-b007-b22e150937e7
+
+	/// Toneladas solo para las 8 aerolíneas con más carga.
+	measure 'Carga top 8 aerolíneas' =
+			IF (
+			    RANKX ( ALLSELECTED ( Aerolineas[Aerolínea] ), [Carga (t)],, DESC, DENSE ) <= 8,
+			    [Carga (t)]
+			)
+		formatString: #,0
+		displayFolder: Carga
+		lineageTag: 77c12dcd-1f43-5092-bda3-d2f3a310a5cd
+
+	column Columna
+		dataType: string
+		isHidden
+		lineageTag: e2c69148-71ee-5b34-b5db-3cb4af82161e
+		summarizeBy: none
+		sourceColumn: Columna
+
+	partition Medidas = m
+		mode: import
+		source = #table(type table [Columna = text], {})
+
+	annotation PBI_ResultType = Table
