@@ -40,6 +40,14 @@ Lo que encontré en los datos al explorarlos:
 5. Comentario equivocado en `sql/12_temporadas.sql`: decía que el aeropuerto estuvo cerrado de abril a agosto de 2020. Lo que muestran los datos es que casi no hubo pasajeros (de 3.589 a 12.314 nacionales al mes, contra 2,4 millones en enero). **Arreglo:** el texto dice eso.
 6. La prueba `test_readme.py` revisa que las 28 cifras clave del README (en español y en inglés) salgan de la consulta de cifras clave (hoy `sql/99_cifras_clave.sql`). Todas aparecen.
 
+## Mejora 1: pronóstico, calidad de datos y una segunda opinión de la IA local
+
+1. **Pronóstico simple** (`sql/19_pronostico.sql`): índice de temporada de los 3 años anteriores y el nivel real de enero a junio. Probado primero con 2025, como si no se supiera el resultado: error medio por mes de **3,4 %** en lo nacional y **12,0 %** en lo internacional. El README solo da el pronóstico nacional de julio a diciembre de 2026 (18,2 millones) y explica por qué no confía en el internacional.
+2. Al hacerlo me di cuenta de que la conclusión 1 ("lo nacional no creció") estaba incompleta: en el primer semestre de 2026 lo nacional creció 6,1 % contra el mismo semestre de 2025. El README ahora lo dice.
+3. **Informe de calidad de datos** (`sql/20_controles_calidad.sql`): 12 controles con lo esperado, lo obtenido y su estado. Los 12 pasan, y una prueba falla si alguno no pasa.
+4. **La prueba del README atrapó un error mío:** escribí 3,3 % y 11,9 % (promedios de cifras ya redondeadas) y el cálculo exacto da 3,4 % y 12,0 %. Corregido.
+5. **Segunda opinión con IA local** (Ollama, modelo `qwen3.5:4b`, 54 segundos, sin gastar cuota de Claude): le pedí revisar solo errores de inglés en `README.en.md`. Devolvió 18 sugerencias. **Acepté 3** ("International is now" pasó a "International traffic is now", "domestic did grow, 6.1% against" pasó a "domestic traffic did grow, 6.1% compared with" y "on domestic... on international" pasó a "for domestic... for international"). **Rechacé 15:** eran reescrituras de estilo que sonaban a IA ("accounted for", "dominated by"), guiones largos (la guía de voz no los usa) y una que cambiaba el sentido ("approximately 25%", cuando la cifra es exacta).
+
 ## Pendiente
 
 - Vuelta 3 de errores: las cifras del tablero de Power BI contra el SQL (página "Control de datos").

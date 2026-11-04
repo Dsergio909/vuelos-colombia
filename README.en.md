@@ -9,7 +9,7 @@ I wanted to know which routes carry the most passengers and cargo in Colombia, w
 ## What I found
 
 **1. The domestic market didn't grow. All the growth was international.**
-Between 2022 and 2025 domestic passengers went from 32.7 to 32.9 million: only 0.4% more. International passengers went from 15.2 to 24.7 million, 61.9% more. International is now 42.9% of all passengers, up from 31.8% in 2022. Note: in the first half of 2026 domestic did grow, 6.1% against the same half of 2025. We'll see if it holds.
+Between 2022 and 2025 domestic passengers went from 32.7 to 32.9 million: only 0.4% more. International passengers went from 15.2 to 24.7 million, 61.9% more. International traffic is now 42.9% of all passengers, up from 31.8% in 2022. Note: in the first half of 2026 domestic traffic did grow, 6.1% compared with the same half of 2025. We'll see if it holds.
 
 **2. When Viva Air and Ultra Air stopped flying, Avianca and LATAM took the market. Then JetSMART arrived.**
 In 2022 Viva and Ultra had 24.7% of domestic passengers. In the data, Viva reports until February 2023 and Ultra until March. That year Avianca and LATAM (with their subsidiaries) went from 62.3% to 77.9%, and the HHI concentration index rose from 2,483 to 3,219 (above 2,500 is considered highly concentrated). By 2025 JetSMART had 13.5%, Avianca and LATAM were down to 68.7% and the HHI was 2,738.
@@ -24,7 +24,7 @@ With an index where 100 is a normal month, December scores 110.7 on domestic fli
 85.1% of the tonnes in 2025 flew on international flights. The Bogotá - Miami route alone carried 47.5% of that international cargo. Cargo leaving Colombia peaks in April, with an index of 126.6. The data doesn't say what is shipped, but the peak matches the flower season before Mother's Day. That's a hypothesis, not a fact from the data.
 
 **A simple forecast for the second half of 2026.**
-With the seasonal index of the three previous years and the actual January to June numbers, I built a July to December forecast. First I tested it on 2025, as if I didn't know what happened: on domestic it was off by 3.4% per month on average, but on international by 12.0%. That's because the base years still carry the post-pandemic recovery. So I only trust the domestic one: for July to December 2026 it gives 18.2 million passengers. The calculation is in [sql/19_pronostico.sql](sql/19_pronostico.sql).
+With the seasonal index of the three previous years and the actual January to June numbers, I built a July to December forecast. First I tested it on 2025, as if I didn't know what happened: for domestic it was off by 3.4% per month on average, but for international by 12.0%. That's because the base years still carry the post-pandemic recovery. So I only trust the domestic one: for July to December 2026 it gives 18.2 million passengers. The calculation is in [sql/19_pronostico.sql](sql/19_pronostico.sql).
 
 One more: on regular domestic flights planes are 81.5% full (2025), based on the seats offered that Aerocivil reports.
 
