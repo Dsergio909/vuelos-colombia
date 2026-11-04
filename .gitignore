@@ -1,0 +1,14 @@
+# Datos crudos (unos 100 MB): se bajan con scripts/descargar_datos.py
+datos/crudos/
+# Base de trabajo de DuckDB: se arma con scripts/correr_sql.py
+datos/*.duckdb
+datos/*.duckdb.wal
+# Entorno de Python
+.venv/
+__pycache__/
+.pytest_cache/
+# Archivos temporales de Power BI
+*.pbix.bak
+powerbi/**/.pbi/localSettings.json
+powerbi/**/.pbi/cache.abf
+.env

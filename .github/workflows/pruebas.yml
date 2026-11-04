@@ -1,0 +1,43 @@
+name: Pruebas
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      # 1. Totales de la copia fija contra los totales de la API, limpieza y resultados
+      - run: python -m pytest -v
+      # 2. Las consultas vuelven a dar exactamente los CSV que estan en resultados/
+      - name: Los resultados guardados se pueden reproducir
+        run: |
+          python scripts/correr_sql.py
+          git diff --exit-code resultados/
+
+  # Compara la copia contra la API en vivo. Se corre a mano (pestaña Actions),
+  # porque Aerocivil corrige cifras provisionales y eso no es un error del codigo.
+  fuente-en-vivo:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -v -m en_linea

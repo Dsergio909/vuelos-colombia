@@ -1,0 +1,37 @@
+sentido,mes,toneladas_promedio_mes,indice_promedio,puesto
+Entra a Colombia,1,19925.0,86.4,12
+Entra a Colombia,2,20678.0,89.9,11
+Entra a Colombia,3,23117.0,100.5,5
+Entra a Colombia,4,21869.0,94.9,8
+Entra a Colombia,5,21822.0,94.6,9
+Entra a Colombia,6,20943.0,91.0,10
+Entra a Colombia,7,22663.0,98.3,7
+Entra a Colombia,8,22892.0,99.3,6
+Entra a Colombia,9,23557.0,101.6,4
+Entra a Colombia,10,25716.0,111.4,3
+Entra a Colombia,11,26660.0,115.5,2
+Entra a Colombia,12,26926.0,116.6,1
+Nacional,1,10501.0,90.8,11
+Nacional,2,11163.0,96.5,9
+Nacional,3,12061.0,104.2,3
+Nacional,4,10321.0,89.2,12
+Nacional,5,11691.0,101.0,6
+Nacional,6,10679.0,92.3,10
+Nacional,7,11352.0,98.1,7
+Nacional,8,11881.0,102.7,4
+Nacional,9,11202.0,96.7,8
+Nacional,10,11762.0,101.6,5
+Nacional,11,12600.0,108.9,2
+Nacional,12,13660.0,118.1,1
+Sale de Colombia,1,44325.0,106.8,2
+Sale de Colombia,2,41381.0,99.8,5
+Sale de Colombia,3,41056.0,99.0,6
+Sale de Colombia,4,52475.0,126.6,1
+Sale de Colombia,5,43428.0,104.6,3
+Sale de Colombia,6,35915.0,86.6,12
+Sale de Colombia,7,37214.0,89.8,11
+Sale de Colombia,8,38124.0,92.0,10
+Sale de Colombia,9,39238.0,94.6,9
+Sale de Colombia,10,43034.0,103.8,4
+Sale de Colombia,11,40754.0,98.3,7
+Sale de Colombia,12,40629.0,98.0,8

@@ -1,0 +1,102 @@
+{
+  "fuente": "Aerocivil, datos.gov.co, licencia CC BY-SA 4.0",
+  "descargado_utc": "2026-11-04T20:14:38+00:00",
+  "conjuntos": {
+    "origen_destino": {
+      "id": "gb6w-ynu4",
+      "url": "https://www.datos.gov.co/d/gb6w-ynu4",
+      "totales_api_por_anio": {
+        "2020": {
+          "filas": 45511.0,
+          "pasajeros": 13327516.0,
+          "carga_correo_kg": 815058609.0
+        },
+        "2021": {
+          "filas": 68139.0,
+          "pasajeros": 30690496.0,
+          "carga_correo_kg": 973916085.5
+        },
+        "2022": {
+          "filas": 68432.0,
+          "pasajeros": 48228683.0,
+          "carga_correo_kg": 995743542.0
+        },
+        "2023": {
+          "filas": 78023.0,
+          "pasajeros": 49665673.0,
+          "carga_correo_kg": 998924458.0
+        },
+        "2024": {
+          "filas": 83506.0,
+          "pasajeros": 56686043.0,
+          "carga_correo_kg": 1038404166.7
+        },
+        "2025": {
+          "filas": 88464.0,
+          "pasajeros": 57591119.0,
+          "carga_correo_kg": 973840892.74
+        },
+        "2026": {
+          "filas": 45935.0,
+          "pasajeros": 29047982.0,
+          "carga_correo_kg": 511842216.0
+        }
+      }
+    },
+    "equipo": {
+      "id": "djjf-g4q4",
+      "url": "https://www.datos.gov.co/d/djjf-g4q4",
+      "totales_api_por_anio": {
+        "2020": {
+          "filas": 26713.0,
+          "n_mero_de_vuelos": 210926.0,
+          "sillas_ofrecidas": 18924674.0,
+          "pasajeros_a_bordo": 14526303.0,
+          "carga_correo_a_bordo_kg": 694367185.0
+        },
+        "2021": {
+          "filas": 36513.0,
+          "n_mero_de_vuelos": 389147.0,
+          "sillas_ofrecidas": 41492670.0,
+          "pasajeros_a_bordo": 32639166.0,
+          "carga_correo_a_bordo_kg": 866005237.0
+        },
+        "2022": {
+          "filas": 37909.0,
+          "n_mero_de_vuelos": 528000.0,
+          "sillas_ofrecidas": 65781493.0,
+          "pasajeros_a_bordo": 52599764.0,
+          "carga_correo_a_bordo_kg": 894702074.0
+        },
+        "2023": {
+          "filas": 33982.0,
+          "n_mero_de_vuelos": 503589.0,
+          "sillas_ofrecidas": 64839491.0,
+          "pasajeros_a_bordo": 53509278.0,
+          "carga_correo_a_bordo_kg": 876690795.0
+        },
+        "2024": {
+          "filas": 31109.0,
+          "n_mero_de_vuelos": 550113.0,
+          "sillas_ofrecidas": 74938322.0,
+          "pasajeros_a_bordo": 60901450.0,
+          "carga_correo_a_bordo_kg": 921598996.0
+        },
+        "2025": {
+          "filas": 33567.0,
+          "n_mero_de_vuelos": 563446.0,
+          "sillas_ofrecidas": 76594504.0,
+          "pasajeros_a_bordo": 62198920.0,
+          "carga_correo_a_bordo_kg": 1006193999.24
+        },
+        "2026": {
+          "filas": 16806.0,
+          "n_mero_de_vuelos": 285589.0,
+          "sillas_ofrecidas": 39160602.0,
+          "pasajeros_a_bordo": 31120346.0,
+          "carga_correo_a_bordo_kg": 529900231.0
+        }
+      }
+    }
+  }
+}
