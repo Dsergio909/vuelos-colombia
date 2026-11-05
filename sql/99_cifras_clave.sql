@@ -76,6 +76,11 @@ f(clave, valor, decimales) as (
         (select sum(pasajeros) from v_od where anio = 2025 and ruta = 'BOG-MDE') / 1e6, 1
     union all select 'pasa_por_bogota_2025_pct',
         100.0 * (select p from bog where anio = 2025 and pasa_bog) / (select sum(p) from bog where anio = 2025), 1
+    union all select 'viva_punto_a_punto_2022_pct',
+        100.0 * (select sum(pasajeros) from v_od
+                 where trafico = 'Nacional' and anio = 2022 and grupo = 'Viva Air' and origen <> 'BOG' and destino <> 'BOG')
+              / (select sum(pasajeros) from v_od
+                 where trafico = 'Nacional' and anio = 2022 and origen <> 'BOG' and destino <> 'BOG'), 1
     union all select 'punto_a_punto_variacion_2022_2024_pct',
         100.0 * ((select p from bog where anio = 2024 and not pasa_bog) / (select p from bog where anio = 2022 and not pasa_bog) - 1), 1
     union all select 'punto_a_punto_variacion_2025_pct',
@@ -96,6 +101,10 @@ f(clave, valor, decimales) as (
               / (select sum(carga_kg) from v_od where anio = 2025 and trafico = 'Internacional'), 1
     union all select 'indice_carga_sale_abril', (select idx from indice_carga where mes = 4), 1
     union all select 'ocupacion_nacional_2025_pct', (select pct from ocupacion where anio = 2025), 1
+    -- ocupacion de nacional e internacional juntos (la que muestra el tablero sin filtro de trafico)
+    union all select 'ocupacion_total_2025_pct',
+        (select 100.0 * sum(pasajeros_a_bordo) / sum(sillas) from eq
+         where es_colombia and tipo_vuelo = 'Regular' and sillas > 0 and anio = 2025), 1
     -- 6. 2026 y el pronostico de julio a diciembre (sql/19_pronostico.sql)
     union all select 'nacional_s1_2026_variacion_pct',
         100.0 * ((select sum(pasajeros) from v_od where trafico = 'Nacional' and anio = 2026 and mes <= 6)

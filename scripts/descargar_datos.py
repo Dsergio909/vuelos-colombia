@@ -3,6 +3,7 @@
 Uso:
     python scripts/descargar_datos.py             # baja todo y arma la copia fija
     python scripts/descargar_datos.py --sin-bajar # solo rehace la copia fija desde datos/crudos
+    python scripts/descargar_datos.py --solo-licencia # solo actualiza la licencia en descarga.json
 
 Que hace:
 1. Baja los datos por paginas de 50.000 filas, en orden fijo (:id), a datos/crudos/ (CSV).
@@ -11,10 +12,11 @@ Que hace:
    las consultas y las pruebas, para que los resultados no cambien solos.
 3. Le pide a la API los totales por año (filas, pasajeros, carga) y los guarda en
    datos/fuente/descarga.json. Las pruebas comparan la copia contra esos totales.
+4. Lee la licencia y la atribucion de los metadatos de cada conjunto (no las escribe a mano)
+   y las guarda en el mismo descarga.json. Hoy dicen CC BY-SA 4.0, Aerocivil.
 
 No pide clave ni registro.
-Fuente: Unidad Administrativa Especial de Aeronautica Civil (Aerocivil),
-publicado en datos.gov.co con licencia CC BY-SA 4.0.
+Fuente: Unidad Administrativa Especial de Aeronautica Civil (Aerocivil), en datos.gov.co.
 """
 from __future__ import annotations
 
@@ -32,6 +34,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 CRUDOS = RAIZ / "datos" / "crudos"
 FUENTE = RAIZ / "datos" / "fuente"
 API = "https://www.datos.gov.co/resource/{id}.{fmt}"
+METADATOS = "https://www.datos.gov.co/api/views/{id}.json"
 PAGINA = 50_000
 REINTENTOS = 4
 
@@ -70,6 +73,18 @@ def totales_por_anio(id_: str, col_anio: str, columnas: list[str]) -> dict[str, 
     filas = consultar(id_, select=f"{col_anio}, count(*) as filas, {sumas}",
                       group=col_anio, order=col_anio, limit="100")
     return {f[col_anio]: {k: float(v) for k, v in f.items() if k != col_anio} for f in filas}
+
+
+def licencia(id_: str) -> dict:
+    """Licencia y atribucion tal como las publica datos.gov.co en los metadatos del conjunto."""
+    meta = json.loads(_get(METADATOS.format(id=id_)))
+    lic = meta.get("license") or {}
+    return {
+        "id": meta.get("licenseId"),
+        "nombre": lic.get("name"),
+        "enlace": lic.get("termsLink"),
+        "atribucion": meta.get("attribution"),
+    }
 
 
 def descargar(nombre: str, id_: str) -> int:
@@ -116,10 +131,23 @@ def a_parquet(nombre: str) -> None:
                f"to '{destino}' (format parquet, compression zstd, compression_level 19)")
 
 
+def solo_licencia() -> int:
+    """Actualiza la licencia en descarga.json sin tocar la copia de los datos."""
+    archivo = FUENTE / "descarga.json"
+    resumen = json.loads(archivo.read_text(encoding="utf-8"))
+    for nombre, (id_, _, _) in CONJUNTOS.items():
+        resumen["conjuntos"][nombre]["licencia"] = licencia(id_)
+        print(f"{nombre} ({id_}): {resumen['conjuntos'][nombre]['licencia']['nombre']}")
+    archivo.write_text(json.dumps(resumen, indent=2, ensure_ascii=False), encoding="utf-8")
+    return 0
+
+
 def main() -> int:
+    if "--solo-licencia" in sys.argv:
+        return solo_licencia()
     sin_bajar = "--sin-bajar" in sys.argv
     resumen = {
-        "fuente": "Aerocivil, datos.gov.co, licencia CC BY-SA 4.0",
+        "fuente": "Aerocivil, datos.gov.co (licencia de cada conjunto abajo, leida de sus metadatos)",
         "descargado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "conjuntos": {},
     }
@@ -131,6 +159,7 @@ def main() -> int:
             "id": id_,
             "url": f"https://www.datos.gov.co/d/{id_}",
             "totales_api_por_anio": totales_por_anio(id_, col_anio, columnas),
+            "licencia": licencia(id_),
         }
     if sin_bajar:
         anterior = CRUDOS / "descarga.json"

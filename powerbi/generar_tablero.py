@@ -214,7 +214,7 @@ RETURN
      """CALCULATE ( [Pasajeros], USERELATIONSHIP ( Trafico[Clave origen], Aeropuertos[Clave] ) )
     + CALCULATE ( [Pasajeros], USERELATIONSHIP ( Trafico[Clave destino], Aeropuertos[Clave] ) )"""),
     ("Rutas", "Pasajeros aeropuertos del mapa", "#,0",
-     "Pasajeros (salen + llegan) de los 12 aeropuertos de Colombia con más pasajeros; el resto queda en blanco.",
+     "Pasajeros (salen + llegan) de los 10 aeropuertos de Colombia con más pasajeros; el resto queda en blanco.",
      """VAR pax = CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
 VAR puesto =
     RANKX (
@@ -222,15 +222,15 @@ VAR puesto =
         CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) ),, DESC, DENSE
     )
 RETURN
-    IF ( NOT ISBLANK ( pax ) && puesto <= 12, pax )"""),
+    IF ( NOT ISBLANK ( pax ) && puesto <= 10, pax )"""),
     ("Rutas", "Latitud del mapa", "0.0000",
-     "Latitud del aeropuerto, solo si está entre los 12 del mapa (el mapa es un gráfico de dispersión).",
+     "Latitud del aeropuerto, solo si está entre los 10 del mapa (el mapa es un gráfico de dispersión).",
      """IF (
     NOT ISBLANK ( [Pasajeros aeropuertos del mapa] ),
     CALCULATE ( AVERAGE ( Aeropuertos[Latitud] ), KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
 )"""),
     ("Rutas", "Longitud del mapa", "0.0000",
-     "Longitud del aeropuerto, solo si está entre los 12 del mapa.",
+     "Longitud del aeropuerto, solo si está entre los 10 del mapa.",
      """IF (
     NOT ISBLANK ( [Pasajeros aeropuertos del mapa] ),
     CALCULATE ( AVERAGE ( Aeropuertos[Longitud] ), KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
@@ -593,6 +593,7 @@ class Pagina:
         }
         if tipo == "clusteredBarChart":
             base["valueAxis"] = [{"properties": {"show": lit(False), "gridlineShow": lit(False)}}]
+            base["categoryAxis"][0]["properties"]["maxMarginFactor"] = lit(45)
         if objetos:
             base.update(objetos)
         if tipo in ("tableEx", "azureMap", "scatterChart"):
@@ -646,7 +647,7 @@ def paginas() -> list[Pagina]:
     p.tarjeta("kpiPasajeros", 24, 92, w, 92, "Pasajeros", "Pasajeros")
     p.tarjeta("kpiVariacion", 24 + (w + 16), 92, w, 92, "Variación vs año anterior", "Pasajeros vs mismos meses del año anterior")
     p.tarjeta("kpiCarga", 24 + 2 * (w + 16), 92, w, 92, "Carga (t)", "Carga y correo (toneladas)")
-    p.tarjeta("kpiOcupacion", 24 + 3 * (w + 16), 92, w, 92, "Ocupación", "Ocupación de vuelos regulares")
+    p.tarjeta("kpiOcupacion", 24 + 3 * (w + 16), 92, w, 92, "Ocupación", "Ocupación del tráfico elegido")
     # Mapa sin Azure Maps (pide iniciar sesión): dispersión con longitud y latitud, sin ejes
     sin_eje = [{"properties": {"show": lit(False), "gridlineShow": lit(False), "showAxisTitle": lit(False)}}]
     p.grafica("mapaAeropuertos", 24, 200, 560, 496, "scatterChart",
@@ -654,7 +655,7 @@ def paginas() -> list[Pagina]:
                "X": [(med("Longitud del mapa"), "Longitud")],
                "Y": [(med("Latitud del mapa"), "Latitud")],
                "Size": [(med("Pasajeros aeropuertos del mapa"), "Pasajeros")]},
-              "Los 12 aeropuertos con más pasajeros, ubicados por latitud y longitud",
+              "Los 10 aeropuertos con más pasajeros, ubicados por latitud y longitud",
               objetos={"categoryAxis": sin_eje, "valueAxis": sin_eje,
                        "categoryLabels": [{"properties": {"show": lit(True), "color": color(TEXTO),
                                                           "fontSize": lit(9)}}],

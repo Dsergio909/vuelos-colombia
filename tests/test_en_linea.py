@@ -38,3 +38,13 @@ def test_la_fuente_no_cambio(descarga, conjunto):
     for anio, valores in guardado.items():
         for k, v in valores.items():
             assert en_vivo[anio][k] == pytest.approx(v, abs=0.01), f"{conjunto} {anio} {k}"
+
+
+@pytest.mark.parametrize("conjunto", ["origen_destino", "equipo"])
+def test_la_licencia_no_cambio(descarga, conjunto):
+    id_ = dd.CONJUNTOS[conjunto][0]
+    try:
+        en_vivo = dd.licencia(id_)
+    except OSError as e:
+        pytest.skip(f"sin conexion a datos.gov.co: {e}")
+    assert en_vivo["id"] == descarga["conjuntos"][conjunto]["licencia"]["id"]

@@ -108,7 +108,7 @@ table Medidas
 		displayFolder: Rutas
 		lineageTag: c2fce2a2-5e17-51ea-af9f-2df8e91637be
 
-	/// Pasajeros (salen + llegan) de los 12 aeropuertos de Colombia con más pasajeros; el resto queda en blanco.
+	/// Pasajeros (salen + llegan) de los 10 aeropuertos de Colombia con más pasajeros; el resto queda en blanco.
 	measure 'Pasajeros aeropuertos del mapa' =
 			VAR pax = CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
 			VAR puesto =
@@ -117,12 +117,12 @@ table Medidas
 			        CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) ),, DESC, DENSE
 			    )
 			RETURN
-			    IF ( NOT ISBLANK ( pax ) && puesto <= 12, pax )
+			    IF ( NOT ISBLANK ( pax ) && puesto <= 10, pax )
 		formatString: #,0
 		displayFolder: Rutas
 		lineageTag: 95b10e2f-b19a-5794-80ed-0e9f16c6d2c4
 
-	/// Latitud del aeropuerto, solo si está entre los 12 del mapa (el mapa es un gráfico de dispersión).
+	/// Latitud del aeropuerto, solo si está entre los 10 del mapa (el mapa es un gráfico de dispersión).
 	measure 'Latitud del mapa' =
 			IF (
 			    NOT ISBLANK ( [Pasajeros aeropuertos del mapa] ),
@@ -132,7 +132,7 @@ table Medidas
 		displayFolder: Rutas
 		lineageTag: 7279b6ac-570a-5e61-b8a3-981c7e10d46c
 
-	/// Longitud del aeropuerto, solo si está entre los 12 del mapa.
+	/// Longitud del aeropuerto, solo si está entre los 10 del mapa.
 	measure 'Longitud del mapa' =
 			IF (
 			    NOT ISBLANK ( [Pasajeros aeropuertos del mapa] ),

@@ -41,6 +41,12 @@
           "pasajeros": 29047982.0,
           "carga_correo_kg": 511842216.0
         }
+      },
+      "licencia": {
+        "id": "CC_40_BY_SA",
+        "nombre": "Creative Commons Attribution | Share Alike 4.0 International",
+        "enlace": "http://creativecommons.org/licenses/by-sa/4.0/legalcode",
+        "atribucion": "Unidad Administrativa Especial de Aeronáutica Civil - AEROCIVIL, Bogotá D.C."
       }
     },
     "equipo": {
@@ -96,6 +102,12 @@
           "pasajeros_a_bordo": 31120346.0,
           "carga_correo_a_bordo_kg": 529900231.0
         }
+      },
+      "licencia": {
+        "id": "CC_40_BY_SA",
+        "nombre": "Creative Commons Attribution | Share Alike 4.0 International",
+        "enlace": "http://creativecommons.org/licenses/by-sa/4.0/legalcode",
+        "atribucion": "Unidad Administrativa Especial de Aeronáutica Civil - AEROCIVIL, Bogotá D.C."
       }
     }
   }

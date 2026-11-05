@@ -99,6 +99,21 @@ Descartado por la sesión principal (no era real): filas de `eq` con sillas en 0
 
 Resultado: **39 pruebas pasan** (antes 38) y la copia limpia da los mismos resultados. Con un turno corto de Power BI: **56 de 56 cifras del tablero iguales al SQL** (ya con los 138 pasajeros menos de 2022), 7.188 rutas en los dos, 2026 con 6 meses en la página de control y BOG-IDA como Bogotá - Puerto Inírida (nacional) y Bogotá - Idaho (internacional). PDF y capturas exportados de nuevo.
 
+## Revisión de la nube (primera vuelta)
+
+La nube clonó el repo como un desconocido: 39 de 39 pruebas, resultados idénticos y Actions en verde. Recalculó con su propio SQL las 32 cifras del README y las 3 del encabezado del tablero (todas coinciden) y rehízo el pronóstico en Python (3,4 %, 12,0 % y 18,2 millones). Privacidad limpia. Pidió estos arreglos; comprobé cada uno contra los datos antes de cambiar:
+
+1. **"Las rutas punto a punto eran las de Viva" era exagerado.** En 2022 Viva llevaba el **31,7 %** de los pasajeros de las rutas que no pasan por Bogotá: era la aerolínea más grande ahí, pero Avianca tenía 22,8 % y LATAM 21,9 %. El README ahora da la cifra (español e inglés) y sale de `99_cifras_clave.sql`, así que la prueba del README la exige.
+2. **"La mitad va en Bogotá - Miami"** pasó a "casi la mitad" (47,5 %) en los dos idiomas.
+3. **Licencia leída de la fuente, no escrita a mano.** Confirmé desde el PC en los metadatos de datos.gov.co que los dos conjuntos dicen `CC_40_BY_SA` (Creative Commons Attribution Share Alike 4.0), atribución Aerocivil. `descargar_datos.py` la lee de `api/views/<id>.json` y la guarda en `descarga.json` (opción nueva `--solo-licencia`, que no toca los datos). Pruebas nuevas: 2 sin internet (la licencia guardada) y 2 en vivo (que no cambió).
+4. **Avisos de licencia de los datos:** `datos/LICENSE.md` y `resultados/LICENSE.md` (como Olist), una nota al final de `LICENSE` (MIT solo cubre el código) y una línea en los dos README.
+5. **CLAUDE.md** manda a leer `Proyectos/Vuelos Colombia.md`, `Proyectos/Como trabajar con Sergio.md` y el plan, como los otros repos.
+6. **Ocupación 81,0 % contra 81,5 %:** las dos están bien. La tarjeta del tablero ahora dice "Ocupación del tráfico elegido" y el README explica que con nacional e internacional juntos da 81,0 % (cifra nueva en `99_cifras_clave.sql`, con su prueba).
+
+Opcionales: el mapa pasó a 10 aeropuertos (los nombres de Medellín Rionegro y Olaya Herrera se cruzaban), las barras dan más espacio al nombre de la ruta, y el README trae el comando para activar el entorno en Windows. No hice `.pbix`: guardaría los datos dentro y el `.pbip` ya es la fuente.
+
+Pruebas en vivo corridas en el PC (la nube no pudo por la red): **4 de 4 pasan**; la fuente no cambió desde la copia del 4 de noviembre. Resultado: **41 pruebas automáticas pasan**, más 4 en vivo. El tablero, actualizado, sigue dando **56 de 56 cifras iguales al SQL**.
+
 ## Pendiente
 
 - Que Sergio vea el antes y el después y dé su «sí» para crear el repo en GitHub.

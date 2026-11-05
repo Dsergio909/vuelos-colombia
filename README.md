@@ -15,7 +15,7 @@ Entre 2022 y 2025 los pasajeros nacionales pasaron de 32,7 a 32,9 millones: apen
 En 2022 Viva y Ultra tenían el 24,7 % de los pasajeros nacionales. En los datos, Viva reporta hasta febrero de 2023 y Ultra hasta marzo. Ese año Avianca y LATAM (con sus filiales) pasaron del 62,3 % al 77,9 %, y el índice de concentración HHI subió de 2.483 a 3.219 (por encima de 2.500 se considera muy concentrado). En 2025 JetSMART ya tenía el 13,5 %, Avianca y LATAM bajaron a 68,7 % y el HHI quedó en 2.738.
 
 **3. Casi todo pasa por Bogotá, pero las rutas que crecen no pasan por allá.**
-El 69,5 % de los pasajeros nacionales de 2025 volaron en una ruta que empieza o termina en El Dorado. Ojo: Aerocivil cuenta pasajeros por tramo de vuelo, así que quien va de Cali a Cartagena con escala en Bogotá cuenta en los dos tramos. La ruta más grande es Bogotá - Medellín, con 4,0 millones de pasajeros en 2025. Las rutas punto a punto (por ejemplo Medellín - Cartagena o Cali - Cartagena) eran las de Viva: cayeron 20,4 % entre 2022 y 2024. En 2025 crecieron 5,2 %, mientras las rutas de Bogotá cayeron 3,8 %.
+El 69,5 % de los pasajeros nacionales de 2025 volaron en una ruta que empieza o termina en El Dorado. Ojo: Aerocivil cuenta pasajeros por tramo de vuelo, así que quien va de Cali a Cartagena con escala en Bogotá cuenta en los dos tramos. La ruta más grande es Bogotá - Medellín, con 4,0 millones de pasajeros en 2025. En las rutas punto a punto (por ejemplo Medellín - Cartagena o Cali - Cartagena), Viva era la aerolínea más grande: en 2022 llevaba el 31,7 % de sus pasajeros, casi un tercio. Esas rutas cayeron 20,4 % entre 2022 y 2024. En 2025 crecieron 5,2 %, mientras las rutas de Bogotá cayeron 3,8 %.
 
 **4. Diciembre es el mes más fuerte y febrero el más flojo.**
 Con un índice donde 100 es un mes normal, en vuelos nacionales diciembre marca 110,7 y febrero 88,4 (promedio de 2022 a 2025). O sea, en diciembre se mueve un 25 % más de pasajeros que en febrero. Julio y agosto son la segunda temporada alta. Si yo tuviera que planear capacidad o personal, ahí es donde me fijaría primero.
@@ -26,7 +26,7 @@ El 85,1 % de las toneladas de 2025 fueron de vuelos internacionales. Solo la rut
 **Un pronóstico simple para el segundo semestre de 2026.**
 Con el índice de temporada de los tres años anteriores y lo real de enero a junio, armé un pronóstico de julio a diciembre. Primero lo probé con 2025, como si no supiera qué iba a pasar: en lo nacional se equivocó en 3,4 % por mes en promedio, pero en lo internacional en 12,0 %. Eso pasa porque los años de base todavía traen la recuperación de la pandemia. Así que solo me fío del nacional: para julio a diciembre de 2026 da 18,2 millones de pasajeros. El cálculo está en [sql/19_pronostico.sql](sql/19_pronostico.sql).
 
-Un dato más: en vuelos nacionales regulares los aviones van llenos en un 81,5 % (2025), según las sillas ofrecidas que reporta Aerocivil.
+Un dato más: en vuelos nacionales regulares los aviones van llenos en un 81,5 % (2025), según las sillas ofrecidas que reporta Aerocivil. Si se suman los internacionales da 81,0 %, que es la cifra que muestra el tablero cuando no se filtra el tráfico.
 
 ## El tablero
 
@@ -34,7 +34,7 @@ Cinco páginas, una por pregunta, y una sexta de control que muestra los totales
 
 | Página | Qué responde |
 |---|---|
-| Resumen y rutas | Cuántos pasajeros, cuánta carga, las 10 rutas principales y los 12 aeropuertos más grandes ubicados por latitud y longitud |
+| Resumen y rutas | Cuántos pasajeros, cuánta carga, las 10 rutas principales y los 10 aeropuertos más grandes ubicados por latitud y longitud |
 | Temporadas | Qué meses se vuela más (índice 100 = mes normal) |
 | Aerolíneas | Quién tiene qué parte del mercado y cómo cambió desde 2022 |
 | Nacional e internacional | Cómo crece cada uno y a qué países se viaja |
@@ -65,14 +65,14 @@ Lo que hay que tener en cuenta:
 
 Las coordenadas de los aeropuertos para el mapa vienen de [OurAirports](https://ourairports.com/data/) (dominio público), unidas por código IATA en [scripts/coordenadas_aeropuertos.py](scripts/coordenadas_aeropuertos.py).
 
-Los datos derivados de este repo (la copia en `datos/fuente/` y los CSV de `resultados/`) quedan con la misma licencia CC BY-SA 4.0. El código tiene licencia MIT.
+Los datos derivados de este repo (la copia en `datos/fuente/`, los CSV de `resultados/`, el PDF y las capturas) quedan con la misma licencia CC BY-SA 4.0: ver [datos/LICENSE.md](datos/LICENSE.md) y [resultados/LICENSE.md](resultados/LICENSE.md). El código tiene licencia MIT. La licencia no la escribí a mano: `scripts/descargar_datos.py` la lee de los metadatos de cada conjunto y una prueba revisa que siga siendo la misma.
 
 ## Cómo lo hice
 
 1. **Datos:** un script baja los dos conjuntos por la API de datos.gov.co (sin clave, en páginas de 50.000 filas, con reintentos) y comprueba que llegaron todas las filas.
 2. **Limpieza en SQL (DuckDB):** tipos, 52 filas sin pasajeros que cuento como 0 y dejo marcadas, ciudades escritas de dos formas ("CALI" y "SANTIAGO DE CALI"), una misma aerolínea con varios nombres y rutas sin dirección (Bogotá - Medellín suma los dos sentidos).
 3. **Consultas:** 10 consultas de análisis en archivos `.sql` numerados y comentados (incluye un informe de calidad de datos y el pronóstico), con CTE y funciones de ventana (`rank`, `lag`, participaciones y acumulados).
-4. **Pruebas:** 39 pruebas que corren en GitHub Actions con cada cambio, y 2 más que se corren a mano y comparan contra la API en vivo. Revisan que los totales por año cuadren con los que calcula la propia API, que la limpieza no pierda ni duplique filas y que cada cifra de este README salga de los datos.
+4. **Pruebas:** 41 pruebas que corren en GitHub Actions con cada cambio, y 4 más que se corren a mano y comparan contra la API en vivo (totales y licencia). Revisan que los totales por año cuadren con los que calcula la propia API, que la limpieza no pierda ni duplique filas y que cada cifra de este README salga de los datos.
 5. **Power BI:** Power Query lee la misma copia y la limpia con los mismos pasos. Encima van las medidas DAX y las seis páginas.
 
 El plan y las preguntas los definí yo. El código lo escribió Claude (IA) y yo revisé cada cifra contra la fuente.
@@ -99,7 +99,7 @@ Necesitas Python 3.12.
 git clone https://github.com/Dsergio909/vuelos-colombia.git
 cd vuelos-colombia
 python -m venv .venv
-.venv/Scripts/activate        # en Linux o Mac: source .venv/bin/activate
+.venv\Scripts\activate       # Windows; en Linux o Mac: source .venv/bin/activate
 pip install -r requirements.txt
 python -m pytest              # pruebas
 python scripts/correr_sql.py  # vuelve a calcular resultados/
@@ -123,10 +123,10 @@ Para abrir el tablero: Power BI Desktop (gratis). Abre `powerbi/vuelos-colombia.
 
 Primero los limpié con SQL, en DuckDB. Había ciudades escritas de dos formas, filas sin pasajeros y aerolíneas con varios nombres. Dejé pruebas automáticas que comparan mis totales con los de la fuente, así sé que no perdí ni inventé nada.
 
-Lo que más me llamó la atención fueron tres cosas. Uno, desde 2022 el mercado nacional está quieto y todo el crecimiento es internacional. Dos, cuando Viva Air y Ultra Air salieron en 2023, Avianca y LATAM pasaron de 62 % a 78 % de los pasajeros nacionales, y las rutas que no pasan por Bogotá se cayeron. JetSMART está recuperando parte de eso. Tres, la carga es casi toda internacional, la mitad va en la ruta Bogotá - Miami y tiene su pico en abril.
+Lo que más me llamó la atención fueron tres cosas. Uno, desde 2022 el mercado nacional está quieto y todo el crecimiento es internacional. Dos, cuando Viva Air y Ultra Air salieron en 2023, Avianca y LATAM pasaron de 62 % a 78 % de los pasajeros nacionales, y las rutas que no pasan por Bogotá se cayeron. JetSMART está recuperando parte de eso. Tres, la carga es casi toda internacional, casi la mitad va en la ruta Bogotá - Miami y tiene su pico en abril.
 
 Todo eso está en un tablero de Power BI de cinco páginas, una por pregunta. Si esto fuera una aerolínea o un aeropuerto, lo usaría para planear capacidad y personal por temporada."
 
 ## Licencia
 
-Código: MIT. Datos: Aerocivil, CC BY-SA 4.0 (ver arriba).
+Código: MIT. Datos: Aerocivil, CC BY-SA 4.0 ([datos/LICENSE.md](datos/LICENSE.md) y [resultados/LICENSE.md](resultados/LICENSE.md)). La licencia MIT no cubre los datos.

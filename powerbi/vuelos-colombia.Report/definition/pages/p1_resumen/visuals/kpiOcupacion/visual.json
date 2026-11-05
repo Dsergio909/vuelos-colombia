@@ -28,7 +28,7 @@
               },
               "queryRef": "Medidas.Ocupación",
               "nativeQueryRef": "Ocupación",
-              "displayName": "Ocupación de vuelos regulares"
+              "displayName": "Ocupación del tráfico elegido"
             }
           ]
         }

@@ -187,7 +187,7 @@ CALCULATE ( [Pasajeros], USERELATIONSHIP ( Trafico[Clave origen], Aeropuertos[Cl
 
 ### Pasajeros aeropuertos del mapa
 
-Pasajeros (salen + llegan) de los 12 aeropuertos de Colombia con más pasajeros; el resto queda en blanco.
+Pasajeros (salen + llegan) de los 10 aeropuertos de Colombia con más pasajeros; el resto queda en blanco.
 
 Formato: `#,0`
 
@@ -200,12 +200,12 @@ VAR puesto =
         CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) ),, DESC, DENSE
     )
 RETURN
-    IF ( NOT ISBLANK ( pax ) && puesto <= 12, pax )
+    IF ( NOT ISBLANK ( pax ) && puesto <= 10, pax )
 ```
 
 ### Latitud del mapa
 
-Latitud del aeropuerto, solo si está entre los 12 del mapa (el mapa es un gráfico de dispersión).
+Latitud del aeropuerto, solo si está entre los 10 del mapa (el mapa es un gráfico de dispersión).
 
 Formato: `0.0000`
 
@@ -219,7 +219,7 @@ IF (
 
 ### Longitud del mapa
 
-Longitud del aeropuerto, solo si está entre los 12 del mapa.
+Longitud del aeropuerto, solo si está entre los 10 del mapa.
 
 Formato: `0.0000`
 

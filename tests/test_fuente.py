@@ -45,3 +45,13 @@ def test_periodo_enero_2020_a_junio_2026(con):
     for tabla in ("od", "eq"):
         desde, hasta = con.execute(f"select min(fecha_mes), max(fecha_mes) from {tabla}").fetchone()
         assert (desde.isoformat(), hasta.isoformat()) == ("2020-01-01", "2026-06-01")
+
+
+@pytest.mark.parametrize("conjunto", ["origen_destino", "equipo"])
+def test_licencia_leida_de_los_metadatos(descarga, conjunto):
+    # La guarda scripts/descargar_datos.py desde los metadatos de datos.gov.co.
+    # Si cambia, hay que cambiar tambien datos/LICENSE.md, resultados/LICENSE.md y los README.
+    lic = descarga["conjuntos"][conjunto]["licencia"]
+    assert lic["id"] == "CC_40_BY_SA"
+    assert "Share Alike 4.0" in lic["nombre"]
+    assert "AEROCIVIL" in lic["atribucion"].upper()

@@ -209,7 +209,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Los 12 aeropuertos con más pasajeros, ubicados por latitud y longitud'"
+                  "Value": "'Los 10 aeropuertos con más pasajeros, ubicados por latitud y longitud'"
                 }
               }
             },

@@ -17,6 +17,7 @@ hhi_2023,3219.0,0
 hhi_2025,2738.0,0
 ruta_bog_mde_2025_millones,4.0,1
 pasa_por_bogota_2025_pct,69.5,1
+viva_punto_a_punto_2022_pct,31.7,1
 punto_a_punto_variacion_2022_2024_pct,-20.4,1
 punto_a_punto_variacion_2025_pct,5.2,1
 pasa_por_bogota_variacion_2025_pct,-3.8,1
@@ -27,6 +28,7 @@ carga_internacional_2025_pct,85.1,1
 carga_bog_mia_2025_pct,47.5,1
 indice_carga_sale_abril,126.6,1
 ocupacion_nacional_2025_pct,81.5,1
+ocupacion_total_2025_pct,81.0,1
 nacional_s1_2026_variacion_pct,6.1,1
 pronostico_error_nacional_pct,3.4,1
 pronostico_error_internacional_pct,12.0,1
