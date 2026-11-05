@@ -113,7 +113,7 @@ table Medidas
 			VAR pax = CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
 			VAR puesto =
 			    RANKX (
-			        ALLSELECTED ( Aeropuertos[Ciudad aeropuerto] ),
+			        ALLSELECTED ( Aeropuertos[Nombre mapa] ),
 			        CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) ),, DESC, DENSE
 			    )
 			RETURN
@@ -141,6 +141,36 @@ table Medidas
 		formatString: 0.0000
 		displayFolder: Rutas
 		lineageTag: 5a5f6a88-d484-5e21-9709-5eea2435d9a3
+
+	/// Fin del eje de las barras: 1,15 veces la barra más grande, para que la etiqueta quepa afuera con cualquier año.
+	measure 'Eje top 10 rutas' = 1.15 * MAXX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Pasajeros top 10 rutas] )
+		formatString: #,0
+		displayFolder: Ejes
+		lineageTag: dc2ece22-547d-5907-8cff-952815730b93
+
+	/// Fin del eje de las barras de países: 1,15 veces la barra más grande.
+	measure 'Eje top 10 países' = 1.15 * MAXX ( ALLSELECTED ( Trafico[País exterior] ), [Pasajeros internacionales top 10 países] )
+		formatString: #,0
+		displayFolder: Ejes
+		lineageTag: 5a050623-a2f1-53d5-ab26-6b216c8c767d
+
+	/// Fin del eje de las barras de rutas internacionales: 1,15 veces la barra más grande.
+	measure 'Eje top 10 rutas internacionales' = 1.15 * MAXX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Pasajeros internacionales top 10 rutas] )
+		formatString: #,0
+		displayFolder: Ejes
+		lineageTag: 5055784a-345a-5b37-a4a4-35c5fedb97d8
+
+	/// Fin del eje de las barras de carga por ruta: 1,15 veces la barra más grande.
+	measure 'Eje carga top 8 rutas' = 1.15 * MAXX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Carga top 8 rutas] )
+		formatString: #,0
+		displayFolder: Ejes
+		lineageTag: 03857846-a701-58b8-82bd-a8e6e8a9ea85
+
+	/// Fin del eje de las barras de carga por aerolínea: 1,15 veces la barra más grande.
+	measure 'Eje carga top 6 aerolíneas' = 1.15 * MAXX ( ALLSELECTED ( Aerolineas[Aerolínea] ), [Carga top 6 aerolíneas] )
+		formatString: #,0
+		displayFolder: Ejes
+		lineageTag: dc401ea2-5ab9-5bc0-b004-2da01559f891
 
 	/// Pasajeros solo para las 10 rutas más grandes de lo que esté filtrado; el resto queda en blanco y no se dibuja.
 	measure 'Pasajeros top 10 rutas' =

@@ -23,11 +23,11 @@
                       "Entity": "Aeropuertos"
                     }
                   },
-                  "Property": "Ciudad aeropuerto"
+                  "Property": "Nombre mapa"
                 }
               },
-              "queryRef": "Aeropuertos.Ciudad aeropuerto",
-              "nativeQueryRef": "Ciudad aeropuerto",
+              "queryRef": "Aeropuertos.Nombre mapa",
+              "nativeQueryRef": "Nombre mapa",
               "displayName": "Aeropuerto"
             }
           ]
@@ -115,6 +115,20 @@
                   "Value": "false"
                 }
               }
+            },
+            "start": {
+              "expr": {
+                "Literal": {
+                  "Value": "-77.3D"
+                }
+              }
+            },
+            "end": {
+              "expr": {
+                "Literal": {
+                  "Value": "-71.7D"
+                }
+              }
             }
           }
         }
@@ -140,6 +154,20 @@
               "expr": {
                 "Literal": {
                   "Value": "false"
+                }
+              }
+            },
+            "start": {
+              "expr": {
+                "Literal": {
+                  "Value": "2.8D"
+                }
+              }
+            },
+            "end": {
+              "expr": {
+                "Literal": {
+                  "Value": "11.9D"
                 }
               }
             }
@@ -171,6 +199,19 @@
               "expr": {
                 "Literal": {
                   "Value": "9D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "bubbles": [
+        {
+          "properties": {
+            "bubbleSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "-12D"
                 }
               }
             }
@@ -209,7 +250,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Los 10 aeropuertos con más pasajeros, ubicados por latitud y longitud'"
+                  "Value": "'Los 10 aeropuertos con más pasajeros (San Andrés queda fuera del recuadro)'"
                 }
               }
             },

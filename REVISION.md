@@ -114,6 +114,16 @@ Opcionales: el mapa pasó a 10 aeropuertos (los nombres de Medellín Rionegro y 
 
 Pruebas en vivo corridas en el PC (la nube no pudo por la red): **4 de 4 pasan**; la fuente no cambió desde la copia del 4 de noviembre. Resultado: **41 pruebas automáticas pasan**, más 4 en vivo. El tablero, actualizado, sigue dando **56 de 56 cifras iguales al SQL**.
 
+## Revisión de la nube (segunda vuelta)
+
+La nube confirmó los arreglos de la primera vuelta (41 de 41 pruebas, Viva 31,68 %, ocupación total 81,04 %, licencia, avisos, CLAUDE.md y privacidad de los 11 commits). Quedaban 2 arreglos visibles:
+
+1. **Etiqueta ilegible en la página 4:** la de Bogotá - Madrid («1,26 mill.») quedaba dentro de la barra, verde oscuro sobre verde oscuro. Ahora las 5 gráficas de barras ponen la etiqueta siempre afuera (`OutsideEnd`) y el eje termina en **1,15 veces la barra más grande de lo que esté filtrado** (5 medidas nuevas en la carpeta `Ejes`: 32 medidas). Como es una medida, sirve para cualquier año. Lo revisé en pantalla con **2022, 2024, 2025 y 2026** en las páginas 1, 4 y 5 (la 3 no tiene barras con etiqueta): ninguna etiqueta quedó adentro ni cortada. Los nombres largos de aerolíneas de carga también se ven completos.
+2. **Nombres del mapa encimados:** el problema de fondo era San Andrés, tan al oeste que apretaba todo el continente en un rincón. El recuadro ahora es fijo en la Colombia continental (el título dice que San Andrés queda fuera), las burbujas son algo más chicas y Medellín sale como «Medellín» (Olaya Herrera no entra entre los 10). Ya no se cruzan Barranquilla, Santa Marta ni Medellín con Bogotá. Probé primero burbujas mucho más chicas y no bastaba: Barranquilla seguía tapando a Santa Marta.
+3. Opcional: partí las 2 frases largas del README (la del HHI y la del pronóstico), en los dos idiomas. La etiqueta «26,3 %» de la página 4 la dejé como está.
+
+Resultado: 41 pruebas pasan, el tablero sigue con **56 de 56 cifras iguales al SQL**, y el PDF y las capturas se exportaron otra vez con el filtro en 2025.
+
 ## Pendiente
 
 - Que Sergio vea el antes y el después y dé su «sí» para crear el repo en GitHub.

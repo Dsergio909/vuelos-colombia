@@ -196,7 +196,7 @@ Pasajeros aeropuertos del mapa =
 VAR pax = CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
 VAR puesto =
     RANKX (
-        ALLSELECTED ( Aeropuertos[Ciudad aeropuerto] ),
+        ALLSELECTED ( Aeropuertos[Nombre mapa] ),
         CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) ),, DESC, DENSE
     )
 RETURN
@@ -230,6 +230,65 @@ IF (
     CALCULATE ( AVERAGE ( Aeropuertos[Longitud] ), KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
 )
 ```
+
+## Ejes
+
+### Eje top 10 rutas
+
+Fin del eje de las barras: 1,15 veces la barra más grande, para que la etiqueta quepa afuera con cualquier año.
+
+Formato: `#,0`
+
+```dax
+Eje top 10 rutas =
+1.15 * MAXX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Pasajeros top 10 rutas] )
+```
+
+### Eje top 10 países
+
+Fin del eje de las barras de países: 1,15 veces la barra más grande.
+
+Formato: `#,0`
+
+```dax
+Eje top 10 países =
+1.15 * MAXX ( ALLSELECTED ( Trafico[País exterior] ), [Pasajeros internacionales top 10 países] )
+```
+
+### Eje top 10 rutas internacionales
+
+Fin del eje de las barras de rutas internacionales: 1,15 veces la barra más grande.
+
+Formato: `#,0`
+
+```dax
+Eje top 10 rutas internacionales =
+1.15 * MAXX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Pasajeros internacionales top 10 rutas] )
+```
+
+### Eje carga top 8 rutas
+
+Fin del eje de las barras de carga por ruta: 1,15 veces la barra más grande.
+
+Formato: `#,0`
+
+```dax
+Eje carga top 8 rutas =
+1.15 * MAXX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Carga top 8 rutas] )
+```
+
+### Eje carga top 6 aerolíneas
+
+Fin del eje de las barras de carga por aerolínea: 1,15 veces la barra más grande.
+
+Formato: `#,0`
+
+```dax
+Eje carga top 6 aerolíneas =
+1.15 * MAXX ( ALLSELECTED ( Aerolineas[Aerolínea] ), [Carga top 6 aerolíneas] )
+```
+
+## Rutas
 
 ### Pasajeros top 10 rutas
 

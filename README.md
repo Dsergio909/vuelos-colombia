@@ -12,7 +12,7 @@ Quería saber qué rutas mueven más pasajeros y carga en Colombia, en qué mese
 Entre 2022 y 2025 los pasajeros nacionales pasaron de 32,7 a 32,9 millones: apenas 0,4 % más. Los internacionales pasaron de 15,2 a 24,7 millones, un 61,9 % más. Por eso lo internacional ya es el 42,9 % de los pasajeros, cuando en 2022 era el 31,8 %. Ojo: en el primer semestre de 2026 lo nacional sí creció, 6,1 % contra el mismo semestre de 2025. Habrá que ver si se sostiene.
 
 **2. Cuando Viva Air y Ultra Air dejaron de volar, Avianca y LATAM se quedaron con el mercado. Después llegó JetSMART.**
-En 2022 Viva y Ultra tenían el 24,7 % de los pasajeros nacionales. En los datos, Viva reporta hasta febrero de 2023 y Ultra hasta marzo. Ese año Avianca y LATAM (con sus filiales) pasaron del 62,3 % al 77,9 %, y el índice de concentración HHI subió de 2.483 a 3.219 (por encima de 2.500 se considera muy concentrado). En 2025 JetSMART ya tenía el 13,5 %, Avianca y LATAM bajaron a 68,7 % y el HHI quedó en 2.738.
+En 2022 Viva y Ultra tenían el 24,7 % de los pasajeros nacionales. En los datos, Viva reporta hasta febrero de 2023 y Ultra hasta marzo. Ese año Avianca y LATAM (con sus filiales) pasaron del 62,3 % al 77,9 %. El índice de concentración HHI subió de 2.483 a 3.219, y por encima de 2.500 un mercado se considera muy concentrado. En 2025 JetSMART ya tenía el 13,5 %, Avianca y LATAM bajaron a 68,7 % y el HHI quedó en 2.738.
 
 **3. Casi todo pasa por Bogotá, pero las rutas que crecen no pasan por allá.**
 El 69,5 % de los pasajeros nacionales de 2025 volaron en una ruta que empieza o termina en El Dorado. Ojo: Aerocivil cuenta pasajeros por tramo de vuelo, así que quien va de Cali a Cartagena con escala en Bogotá cuenta en los dos tramos. La ruta más grande es Bogotá - Medellín, con 4,0 millones de pasajeros en 2025. En las rutas punto a punto (por ejemplo Medellín - Cartagena o Cali - Cartagena), Viva era la aerolínea más grande: en 2022 llevaba el 31,7 % de sus pasajeros, casi un tercio. Esas rutas cayeron 20,4 % entre 2022 y 2024. En 2025 crecieron 5,2 %, mientras las rutas de Bogotá cayeron 3,8 %.
@@ -24,7 +24,7 @@ Con un índice donde 100 es un mes normal, en vuelos nacionales diciembre marca 
 El 85,1 % de las toneladas de 2025 fueron de vuelos internacionales. Solo la ruta Bogotá - Miami llevó el 47,5 % de esa carga internacional. La carga que sale de Colombia tiene su pico en abril, con un índice de 126,6. Los datos no dicen qué se lleva, pero el pico coincide con la temporada de flores del Día de la Madre. Eso queda como hipótesis, no como dato.
 
 **Un pronóstico simple para el segundo semestre de 2026.**
-Con el índice de temporada de los tres años anteriores y lo real de enero a junio, armé un pronóstico de julio a diciembre. Primero lo probé con 2025, como si no supiera qué iba a pasar: en lo nacional se equivocó en 3,4 % por mes en promedio, pero en lo internacional en 12,0 %. Eso pasa porque los años de base todavía traen la recuperación de la pandemia. Así que solo me fío del nacional: para julio a diciembre de 2026 da 18,2 millones de pasajeros. El cálculo está en [sql/19_pronostico.sql](sql/19_pronostico.sql).
+Con el índice de temporada de los tres años anteriores y lo real de enero a junio, armé un pronóstico de julio a diciembre. Primero lo probé con 2025, como si no supiera qué iba a pasar. En lo nacional se equivocó en 3,4 % por mes en promedio; en lo internacional, en 12,0 %. Eso pasa porque los años de base todavía traen la recuperación de la pandemia. Así que solo me fío del nacional: para julio a diciembre de 2026 da 18,2 millones de pasajeros. El cálculo está en [sql/19_pronostico.sql](sql/19_pronostico.sql).
 
 Un dato más: en vuelos nacionales regulares los aviones van llenos en un 81,5 % (2025), según las sillas ofrecidas que reporta Aerocivil. Si se suman los internacionales da 81,0 %, que es la cifra que muestra el tablero cuando no se filtra el tráfico.
 
@@ -34,7 +34,7 @@ Cinco páginas, una por pregunta, y una sexta de control que muestra los totales
 
 | Página | Qué responde |
 |---|---|
-| Resumen y rutas | Cuántos pasajeros, cuánta carga, las 10 rutas principales y los 10 aeropuertos más grandes ubicados por latitud y longitud |
+| Resumen y rutas | Cuántos pasajeros, cuánta carga, las 10 rutas principales y los 10 aeropuertos más grandes ubicados por latitud y longitud (San Andrés queda fuera del recuadro) |
 | Temporadas | Qué meses se vuela más (índice 100 = mes normal) |
 | Aerolíneas | Quién tiene qué parte del mercado y cómo cambió desde 2022 |
 | Nacional e internacional | Cómo crece cada uno y a qué países se viaja |
@@ -115,7 +115,7 @@ Para abrir el tablero: Power BI Desktop (gratis). Abre `powerbi/vuelos-colombia.
 - Tampoco dicen qué tipo de carga se mueve. La relación entre el pico de abril y las flores es una hipótesis.
 - Las rutas son entre aeropuertos. Un pasajero que va de Cali a Madrid por Bogotá puede quedar como dos trayectos.
 - El pronóstico es simple a propósito. Un modelo con tendencia o con más años serviría mejor para lo internacional.
-- El mapa no tiene fondo con el contorno del país. El mapa de Power BI (Azure Maps) pide iniciar sesión con una cuenta, así que usé un gráfico de dispersión con la latitud y la longitud de cada aeropuerto. Se lee igual y lo puede abrir cualquiera.
+- El mapa no tiene fondo con el contorno del país. El mapa de Power BI (Azure Maps) pide iniciar sesión con una cuenta, así que usé un gráfico de dispersión con la latitud y la longitud de cada aeropuerto. Se lee igual y lo puede abrir cualquiera. El recuadro muestra solo la Colombia continental: con San Andrés, que queda muy al oeste, los nombres de la costa se montaban unos sobre otros.
 
 ## Cómo explicarlo en 2 minutos
 

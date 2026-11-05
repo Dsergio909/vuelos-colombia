@@ -12,7 +12,7 @@ I wanted to know which routes carry the most passengers and cargo in Colombia, w
 Between 2022 and 2025 domestic passengers went from 32.7 to 32.9 million: only 0.4% more. International passengers went from 15.2 to 24.7 million, 61.9% more. International traffic is now 42.9% of all passengers, up from 31.8% in 2022. Note: in the first half of 2026 domestic traffic did grow, 6.1% compared with the same half of 2025. We'll see if it holds.
 
 **2. When Viva Air and Ultra Air stopped flying, Avianca and LATAM took the market. Then JetSMART arrived.**
-In 2022 Viva and Ultra had 24.7% of domestic passengers. In the data, Viva reports until February 2023 and Ultra until March. That year Avianca and LATAM (with their subsidiaries) went from 62.3% to 77.9%, and the HHI concentration index rose from 2,483 to 3,219 (above 2,500 is considered highly concentrated). By 2025 JetSMART had 13.5%, Avianca and LATAM were down to 68.7% and the HHI was 2,738.
+In 2022 Viva and Ultra had 24.7% of domestic passengers. In the data, Viva reports until February 2023 and Ultra until March. That year Avianca and LATAM (with their subsidiaries) went from 62.3% to 77.9%. The HHI concentration index rose from 2,483 to 3,219, and above 2,500 a market is considered highly concentrated. By 2025 JetSMART had 13.5%, Avianca and LATAM were down to 68.7% and the HHI was 2,738.
 
 **3. Almost everything goes through Bogotá, but the routes that are growing don't.**
 69.5% of domestic passengers in 2025 flew a route that starts or ends at El Dorado. Note: Aerocivil counts passengers per flight leg, so someone flying from Cali to Cartagena with a stop in Bogotá counts on both legs. The biggest route is Bogotá - Medellín, with 4.0 million passengers in 2025. On point-to-point routes (for example Medellín - Cartagena or Cali - Cartagena), Viva was the biggest airline: in 2022 it carried 31.7% of their passengers, almost a third. Those routes fell 20.4% between 2022 and 2024. In 2025 they grew 5.2%, while Bogotá routes fell 3.8%.
@@ -24,7 +24,7 @@ With an index where 100 is a normal month, December scores 110.7 on domestic fli
 85.1% of the tonnes in 2025 flew on international flights. The Bogotá - Miami route alone carried 47.5% of that international cargo. Cargo leaving Colombia peaks in April, with an index of 126.6. The data doesn't say what is shipped, but the peak matches the flower season before Mother's Day. That's a hypothesis, not a fact from the data.
 
 **A simple forecast for the second half of 2026.**
-With the seasonal index of the three previous years and the actual January to June numbers, I built a July to December forecast. First I tested it on 2025, as if I didn't know what happened: for domestic it was off by 3.4% per month on average, but for international by 12.0%. That's because the base years still carry the post-pandemic recovery. So I only trust the domestic one: for July to December 2026 it gives 18.2 million passengers. The calculation is in [sql/19_pronostico.sql](sql/19_pronostico.sql).
+With the seasonal index of the three previous years and the actual January to June numbers, I built a July to December forecast. First I tested it on 2025, as if I didn't know what happened. For domestic it was off by 3.4% per month on average; for international, by 12.0%. That's because the base years still carry the post-pandemic recovery. So I only trust the domestic one: for July to December 2026 it gives 18.2 million passengers. The calculation is in [sql/19_pronostico.sql](sql/19_pronostico.sql).
 
 One more: on regular domestic flights planes are 81.5% full (2025), based on the seats offered that Aerocivil reports. Adding international flights gives 81.0%, which is the number the dashboard shows when traffic isn't filtered.
 
@@ -34,7 +34,7 @@ Five pages, one per question, plus a sixth control page that shows the totals by
 
 | Page | What it answers |
 |---|---|
-| Overview and routes | How many passengers, how much cargo, the top 10 routes and the 10 largest airports placed by latitude and longitude |
+| Overview and routes | How many passengers, how much cargo, the top 10 routes and the 10 largest airports placed by latitude and longitude (San Andrés is outside the frame) |
 | Seasons | Which months are busiest (index 100 = normal month) |
 | Airlines | Who has which share of the market and how it changed since 2022 |
 | Domestic and international | How each one grows and which countries people fly to |
@@ -115,7 +115,7 @@ To open the dashboard: Power BI Desktop (free). Open `powerbi/vuelos-colombia.pb
 - It doesn't say what kind of cargo is shipped either. The link between the April peak and flowers is a hypothesis.
 - Routes are between airports. A passenger flying Cali to Madrid through Bogotá may show up as two legs.
 - The forecast is simple on purpose. A model with trend or more years would work better for international.
-- The map has no country outline behind it. The Power BI map (Azure Maps) asks you to sign in with an account, so I used a scatter chart with each airport's latitude and longitude. It reads the same and anyone can open it.
+- The map has no country outline behind it. The Power BI map (Azure Maps) asks you to sign in with an account, so I used a scatter chart with each airport's latitude and longitude. It reads the same and anyone can open it. The frame shows only mainland Colombia: with San Andrés, far to the west, the names on the coast ended up on top of each other.
 
 ## How to explain it in 2 minutes
 

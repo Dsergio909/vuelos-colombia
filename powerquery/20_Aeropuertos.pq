@@ -38,7 +38,11 @@ let
         #"SAN JOSE DEL GUAVIARE" = "San José del Guaviare", MITU = "Mitú", APARTADO = "Apartadó"],
     Mostrar = Table.AddColumn(Etiqueta, "Ciudad aeropuerto",
         each Record.FieldOrDefault(ConTildes, [Etiqueta], Text.Proper([Etiqueta])), type text),
-    Clave = Table.AddColumn(Mostrar, "Clave", each [Código] & "|" & [País], type text),
+    // En el mapa no hace falta "(Rionegro)": Olaya Herrera no entra entre los 10 más grandes, y el nombre largo
+    // quedaba tapado por la burbuja de Bogotá
+    NombreMapa = Table.AddColumn(Mostrar, "Nombre mapa",
+        each if [Código] = "MDE" and [País] = "COLOMBIA" then "Medellín" else [Ciudad aeropuerto], type text),
+    Clave = Table.AddColumn(NombreMapa, "Clave", each [Código] & "|" & [País], type text),
     // Coordenadas de OurAirports (dominio público), armadas con scripts/coordenadas_aeropuertos.py
     Csv = Csv.Document(File.Contents(CarpetaDatos & "\referencia\aeropuertos_coordenadas.csv"),
         [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
@@ -46,6 +50,6 @@ let
         {{"latitud", type number}, {"longitud", type number}}, "en-US"),
     Unido = Table.NestedJoin(Clave, {"Código", "País"}, Coordenadas, {"codigo", "pais"}, "c", JoinKind.LeftOuter),
     ConCoordenadas = Table.ExpandTableColumn(Unido, "c", {"latitud", "longitud"}, {"Latitud", "Longitud"}),
-    Final = Table.SelectColumns(ConCoordenadas, {"Clave", "Código", "País", "Ciudad aeropuerto", "Latitud", "Longitud"})
+    Final = Table.SelectColumns(ConCoordenadas, {"Clave", "Código", "País", "Ciudad aeropuerto", "Nombre mapa", "Latitud", "Longitud"})
 in
     Final

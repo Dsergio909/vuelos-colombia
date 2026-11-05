@@ -90,6 +90,7 @@ TABLAS = {
         ("Código", T, None, "none", False, {}),
         ("País", T, None, "none", False, {}),
         ("Ciudad aeropuerto", T, None, "none", False, {}),
+        ("Nombre mapa", T, None, "none", False, {}),
         ("Latitud", D, "0.0000", "none", False, {"dataCategory": "Latitude"}),
         ("Longitud", D, "0.0000", "none", False, {"dataCategory": "Longitude"}),
     ]),
@@ -218,7 +219,7 @@ RETURN
      """VAR pax = CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
 VAR puesto =
     RANKX (
-        ALLSELECTED ( Aeropuertos[Ciudad aeropuerto] ),
+        ALLSELECTED ( Aeropuertos[Nombre mapa] ),
         CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) ),, DESC, DENSE
     )
 RETURN
@@ -235,6 +236,21 @@ RETURN
     NOT ISBLANK ( [Pasajeros aeropuertos del mapa] ),
     CALCULATE ( AVERAGE ( Aeropuertos[Longitud] ), KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
 )"""),
+    ("Ejes", "Eje top 10 rutas", "#,0",
+     "Fin del eje de las barras: 1,15 veces la barra más grande, para que la etiqueta quepa afuera con cualquier año.",
+     "1.15 * MAXX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Pasajeros top 10 rutas] )"),
+    ("Ejes", "Eje top 10 países", "#,0",
+     "Fin del eje de las barras de países: 1,15 veces la barra más grande.",
+     "1.15 * MAXX ( ALLSELECTED ( Trafico[País exterior] ), [Pasajeros internacionales top 10 países] )"),
+    ("Ejes", "Eje top 10 rutas internacionales", "#,0",
+     "Fin del eje de las barras de rutas internacionales: 1,15 veces la barra más grande.",
+     "1.15 * MAXX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Pasajeros internacionales top 10 rutas] )"),
+    ("Ejes", "Eje carga top 8 rutas", "#,0",
+     "Fin del eje de las barras de carga por ruta: 1,15 veces la barra más grande.",
+     "1.15 * MAXX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Carga top 8 rutas] )"),
+    ("Ejes", "Eje carga top 6 aerolíneas", "#,0",
+     "Fin del eje de las barras de carga por aerolínea: 1,15 veces la barra más grande.",
+     "1.15 * MAXX ( ALLSELECTED ( Aerolineas[Aerolínea] ), [Carga top 6 aerolíneas] )"),
     ("Rutas", "Pasajeros top 10 rutas", "#,0",
      "Pasajeros solo para las 10 rutas más grandes de lo que esté filtrado; el resto queda en blanco y no se dibuja.",
      """IF (
@@ -618,6 +634,16 @@ def etiquetas(mostrar=True, unidades=0) -> dict:
                                        "labelDisplayUnits": lit(unidades)}}]}
 
 
+def barras(eje: str, unidades=0) -> dict:
+    """Barras horizontales: color de acento, etiqueta siempre afuera y el eje hasta 1,15 veces la barra más
+    grande (medida `eje`), para que la etiqueta de la barra más larga no quede adentro con ningún año."""
+    o = {**color_serie(ACENTO), **etiquetas(True, unidades)}
+    o["labels"][0]["properties"]["labelPosition"] = lit("OutsideEnd")
+    o["valueAxis"] = [{"properties": {"show": lit(False), "gridlineShow": lit(False),
+                                      "start": lit(0), "end": {"expr": med(eje)}}}]
+    return o
+
+
 # ---------------------------------------------------------------------------
 # Las paginas
 # ---------------------------------------------------------------------------
@@ -651,21 +677,24 @@ def paginas() -> list[Pagina]:
     # Mapa sin Azure Maps (pide iniciar sesión): dispersión con longitud y latitud, sin ejes
     sin_eje = [{"properties": {"show": lit(False), "gridlineShow": lit(False), "showAxisTitle": lit(False)}}]
     p.grafica("mapaAeropuertos", 24, 200, 560, 496, "scatterChart",
-              {"Category": [(col("Aeropuertos", "Ciudad aeropuerto"), "Aeropuerto")],
+              {"Category": [(col("Aeropuertos", "Nombre mapa"), "Aeropuerto")],
                "X": [(med("Longitud del mapa"), "Longitud")],
                "Y": [(med("Latitud del mapa"), "Latitud")],
                "Size": [(med("Pasajeros aeropuertos del mapa"), "Pasajeros")]},
-              "Los 10 aeropuertos con más pasajeros, ubicados por latitud y longitud",
-              objetos={"categoryAxis": sin_eje, "valueAxis": sin_eje,
+              "Los 10 aeropuertos con más pasajeros (San Andrés queda fuera del recuadro)",
+              # recuadro fijo en Colombia continental: San Andres (muy al oeste) apretaba todo y los nombres se cruzaban
+              objetos={"categoryAxis": [{"properties": {**sin_eje[0]["properties"], "start": lit(-77.3), "end": lit(-71.7)}}],
+                       "valueAxis": [{"properties": {**sin_eje[0]["properties"], "start": lit(2.8), "end": lit(11.9)}}],
                        "categoryLabels": [{"properties": {"show": lit(True), "color": color(TEXTO),
                                                           "fontSize": lit(9)}}],
+                       "bubbles": [{"properties": {"bubbleSize": lit(-12)}}],
                        **color_serie(ACENTO)})
     p.grafica("topRutas", 600, 200, 656, 496, "clusteredBarChart",
               {"Category": [(col("Rutas", "Nombre ruta"), "Ruta")],
                "Y": [(med("Pasajeros top 10 rutas"), "Pasajeros")]},
               "Las 10 rutas con más pasajeros (ida y vuelta)",
               orden={"campo": med("Pasajeros top 10 rutas"), "dir": "Descending"},
-              objetos={**color_serie(ACENTO), **etiquetas(True, 0)})
+              objetos=barras("Eje top 10 rutas"))
     ps.append(p)
 
     # 2. Temporadas ----------------------------------------------------------
@@ -736,13 +765,13 @@ def paginas() -> list[Pagina]:
                "Y": [(med("Pasajeros internacionales top 10 países"), "Pasajeros")]},
               "Los 10 países con más viajeros",
               orden={"campo": med("Pasajeros internacionales top 10 países"), "dir": "Descending"},
-              objetos={**color_serie(ACENTO), **etiquetas(True, 0)})
+              objetos=barras("Eje top 10 países"))
     p.grafica("topRutasInt", 648, 376, 608, 320, "clusteredBarChart",
               {"Category": [(col("Rutas", "Nombre ruta"), "Ruta")],
                "Y": [(med("Pasajeros internacionales top 10 rutas"), "Pasajeros")]},
               "Las 10 rutas internacionales más grandes",
               orden={"campo": med("Pasajeros internacionales top 10 rutas"), "dir": "Descending"},
-              objetos={**color_serie(ACENTO), **etiquetas(True, 0)})
+              objetos=barras("Eje top 10 rutas internacionales"))
     p.sin_filtro("filtroAnio", "paxAnio", "pctInternacional")
     ps.append(p)
 
@@ -768,13 +797,13 @@ def paginas() -> list[Pagina]:
                "Y": [(med("Carga top 8 rutas"), "Toneladas")]},
               "Las 8 rutas con más carga (toneladas)",
               orden={"campo": med("Carga top 8 rutas"), "dir": "Descending"},
-              objetos={**color_serie(ACENTO), **etiquetas(True, 1)})
+              objetos=barras("Eje carga top 8 rutas", 1))
     p.grafica("topAerolineasCarga", 648, 476, 608, 220, "clusteredBarChart",
               {"Category": [(col("Aerolineas", "Aerolínea"), "Aerolínea")],
                "Y": [(med("Carga top 6 aerolíneas"), "Toneladas")]},
               "Las 6 aerolíneas con más carga (toneladas)",
               orden={"campo": med("Carga top 6 aerolíneas"), "dir": "Descending"},
-              objetos={**color_serie(ACENTO), **etiquetas(True, 1)})
+              objetos=barras("Eje carga top 6 aerolíneas", 1))
     ps.append(p)
 
     # 6. Control de datos ----------------------------------------------------
