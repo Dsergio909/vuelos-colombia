@@ -3,10 +3,10 @@
   "name": "topAerolineasCarga",
   "position": {
     "x": 648,
-    "y": 456,
+    "y": 476,
     "z": 7000,
     "width": 608,
-    "height": 240,
+    "height": 220,
     "tabOrder": 7000
   },
   "visual": {
@@ -42,11 +42,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Carga top 8 aerolíneas"
+                  "Property": "Carga top 6 aerolíneas"
                 }
               },
-              "queryRef": "Medidas.Carga top 8 aerolíneas",
-              "nativeQueryRef": "Carga top 8 aerolíneas",
+              "queryRef": "Medidas.Carga top 6 aerolíneas",
+              "nativeQueryRef": "Carga top 6 aerolíneas",
               "displayName": "Toneladas"
             }
           ]
@@ -62,7 +62,7 @@
                     "Entity": "Medidas"
                   }
                 },
-                "Property": "Carga top 8 aerolíneas"
+                "Property": "Carga top 6 aerolíneas"
               }
             },
             "direction": "Descending"
@@ -106,39 +106,17 @@
       "valueAxis": [
         {
           "properties": {
-            "labelColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#5b6770'"
-                    }
-                  }
-                }
-              }
-            },
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "9D"
-                }
-              }
-            },
-            "showAxisTitle": {
+            "show": {
               "expr": {
                 "Literal": {
                   "Value": "false"
                 }
               }
             },
-            "gridlineColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#eceef0'"
-                    }
-                  }
+            "gridlineShow": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }
@@ -231,7 +209,7 @@
             "labelDisplayUnits": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "1D"
                 }
               }
             }
@@ -253,7 +231,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Las 8 aerolíneas con más carga (toneladas)'"
+                  "Value": "'Las 6 aerolíneas con más carga (toneladas)'"
                 }
               }
             },

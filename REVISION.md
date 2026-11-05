@@ -61,7 +61,29 @@ Mientras esperaba turno de Power BI, comparé el README con lo que de verdad gen
 
 Resultado: **38 pruebas pasan** (antes 37), 2 se corren a mano.
 
+## Vuelta 3 de errores: el tablero contra el SQL
+
+Con mi turno de Power BI (sin tocar la pantalla para esta parte): abrí el proyecto, actualicé el modelo tabla por tabla desde PowerShell y corrí consultas DAX contra el motor de Power BI.
+
+- **El refresco ya no se cuelga:** el modelo completo cargó en unos **85 segundos** (antes pasaba de 30 minutos y hubo que cancelarlo). La tabla más lenta es Rutas, con 28 a 32 segundos.
+- **56 de 56 cifras iguales al SQL:** pasajeros totales, nacionales e internacionales, carga y carga internacional, ocupación nacional y HHI de cada año de 2020 a 2026, más filas (465.760), aeropuertos (1.438), índices de diciembre (110,7), febrero (88,4) y carga que sale en abril (126,6), Bogotá - Medellín 2025 y la parte de JetSMART. Las 10 rutas nacionales de 2025 salen en el mismo orden que `resultados/11_rutas_principales.csv`.
+- Solo el 0,38 % de los pasajeros por aeropuerto cae en aeropuertos sin coordenadas.
+
+## Diseño: mirar cada página como la vería un reclutador
+
+Revisé las 6 páginas en pantalla. Encontré 5 problemas:
+
+1. **El mapa salía vacío:** Azure Maps pide iniciar sesión con una cuenta. Lo cambié por un gráfico de dispersión con latitud y longitud, sin ejes, con los **12** aeropuertos de Colombia con más pasajeros y sus nombres. Se reconoce la forma del país (San Andrés arriba a la izquierda, Bogotá como el círculo más grande). Tres medidas nuevas: 26 en total.
+2. **El filtro de año cortaba las gráficas "por año":** en Aerolíneas y en Nacional e internacional, las barras y las líneas de 2020 a 2026 mostraban solo 2025. Ahora el filtro de año no las toca (`visualInteractions` con `NoFilter`).
+3. **Listas cortadas:** los "top 10" de países y rutas internacionales mostraban 9 y pedían barra de desplazamiento; en Carga se veían 7 de 10 rutas y 7 de 8 aerolíneas. Ajusté los tamaños y en Carga pasé a 8 rutas y 6 aerolíneas, que caben completas.
+4. **Carga en "0,39 mill.":** ahora las barras dicen las toneladas enteras (388.785) y no tienen eje repetido.
+5. **La línea importante no se distinguía:** en el índice de carga, "Sale de Colombia" (la del pico de abril) va con el color de acento y las otras dos en gris claro.
+
+También aclaré en la página de control que su ocupación junta nacional e internacional.
+
+Entregables: `docs/tablero.pdf` (6 páginas, 436 KB) y 5 capturas en `capturas/`, sacadas de ese mismo PDF con Inkscape (sin los paneles de Power BI). No guardé `.pbix`: el proyecto en texto (`.pbip`) es la fuente y se puede revisar línea por línea en GitHub.
+
 ## Pendiente
 
-- Vuelta 3 de errores: las cifras del tablero de Power BI contra el SQL (página "Control de datos").
-- Vueltas de mejora y de diseño.
+- Que Sergio vea el antes y el después y dé su «sí» para crear el repo en GitHub.
+- Ver las pruebas en verde en GitHub Actions.

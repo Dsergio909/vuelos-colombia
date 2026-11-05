@@ -34,7 +34,7 @@ Five pages, one per question, plus a sixth control page that shows the totals by
 
 | Page | What it answers |
 |---|---|
-| Overview and routes | How many passengers, how much cargo, and the main routes on the map |
+| Overview and routes | How many passengers, how much cargo, the top 10 routes and the 12 largest airports placed by latitude and longitude |
 | Seasons | Which months are busiest (index 100 = normal month) |
 | Airlines | Who has which share of the market and how it changed since 2022 |
 | Domestic and international | How each one grows and which countries people fly to |
@@ -115,6 +115,7 @@ To open the dashboard: Power BI Desktop (free). Open `powerbi/vuelos-colombia.pb
 - It doesn't say what kind of cargo is shipped either. The link between the April peak and flowers is a hypothesis.
 - Routes are between airports. A passenger flying Cali to Madrid through Bogotá may show up as two legs.
 - The forecast is simple on purpose. A model with trend or more years would work better for international.
+- The map has no country outline behind it. The Power BI map (Azure Maps) asks you to sign in with an account, so I used a scatter chart with each airport's latitude and longitude. It reads the same and anyone can open it.
 
 ## How to explain it in 2 minutes
 

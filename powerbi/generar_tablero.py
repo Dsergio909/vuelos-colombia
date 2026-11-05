@@ -207,6 +207,28 @@ RETURN
      "Pasajeros que salen más los que llegan. Usa las dos relaciones inactivas con Aeropuertos.",
      """CALCULATE ( [Pasajeros], USERELATIONSHIP ( Trafico[Clave origen], Aeropuertos[Clave] ) )
     + CALCULATE ( [Pasajeros], USERELATIONSHIP ( Trafico[Clave destino], Aeropuertos[Clave] ) )"""),
+    ("Rutas", "Pasajeros aeropuertos del mapa", "#,0",
+     "Pasajeros (salen + llegan) de los 12 aeropuertos de Colombia con más pasajeros; el resto queda en blanco.",
+     """VAR pax = CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
+VAR puesto =
+    RANKX (
+        ALLSELECTED ( Aeropuertos[Ciudad aeropuerto] ),
+        CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) ),, DESC, DENSE
+    )
+RETURN
+    IF ( NOT ISBLANK ( pax ) && puesto <= 12, pax )"""),
+    ("Rutas", "Latitud del mapa", "0.0000",
+     "Latitud del aeropuerto, solo si está entre los 12 del mapa (el mapa es un gráfico de dispersión).",
+     """IF (
+    NOT ISBLANK ( [Pasajeros aeropuertos del mapa] ),
+    CALCULATE ( AVERAGE ( Aeropuertos[Latitud] ), KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
+)"""),
+    ("Rutas", "Longitud del mapa", "0.0000",
+     "Longitud del aeropuerto, solo si está entre los 12 del mapa.",
+     """IF (
+    NOT ISBLANK ( [Pasajeros aeropuertos del mapa] ),
+    CALCULATE ( AVERAGE ( Aeropuertos[Longitud] ), KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
+)"""),
     ("Rutas", "Pasajeros top 10 rutas", "#,0",
      "Pasajeros solo para las 10 rutas más grandes de lo que esté filtrado; el resto queda en blanco y no se dibuja.",
      """IF (
@@ -287,16 +309,16 @@ VAR indices =
     )
 RETURN
     AVERAGEX ( indices, [@indice] )"""),
-    ("Carga", "Carga top 10 rutas", "#,0",
-     "Toneladas solo para las 10 rutas con más carga.",
+    ("Carga", "Carga top 8 rutas", "#,0",
+     "Toneladas solo para las 8 rutas con más carga.",
      """IF (
-    RANKX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Carga (t)],, DESC, DENSE ) <= 10,
+    RANKX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Carga (t)],, DESC, DENSE ) <= 8,
     [Carga (t)]
 )"""),
-    ("Carga", "Carga top 8 aerolíneas", "#,0",
-     "Toneladas solo para las 8 aerolíneas con más carga.",
+    ("Carga", "Carga top 6 aerolíneas", "#,0",
+     "Toneladas solo para las 6 aerolíneas con más carga.",
      """IF (
-    RANKX ( ALLSELECTED ( Aerolineas[Aerolínea] ), [Carga (t)],, DESC, DENSE ) <= 8,
+    RANKX ( ALLSELECTED ( Aerolineas[Aerolínea] ), [Carga (t)],, DESC, DENSE ) <= 6,
     [Carga (t)]
 )"""),
 ]
@@ -450,9 +472,6 @@ def med(nombre: str) -> dict:
     return {"Measure": {"Expression": {"SourceRef": {"Entity": "Medidas"}}, "Property": nombre}}
 
 
-def prom(tabla: str, columna: str) -> dict:
-    return {"Aggregation": {"Expression": col(tabla, columna), "Function": 1}}
-
 
 def proyeccion(campo: dict, nombre: str | None = None) -> dict:
     if "Measure" in campo:
@@ -486,6 +505,11 @@ def titulo(texto: str, tamano: int = 11) -> dict:
 class Pagina:
     def __init__(self, nombre: str, mostrar: str):
         self.nombre, self.mostrar, self.visuales = nombre, mostrar, []
+        self.interacciones = []
+
+    def sin_filtro(self, origen: str, *destinos: str):
+        """El segmentador `origen` no filtra estos visuales (por ejemplo, gráficas que muestran todos los años)."""
+        self.interacciones += [{"source": origen, "target": d, "type": "NoFilter"} for d in destinos]
 
     def agregar(self, nombre: str, x, y, w, h, visual: dict, contenedor: dict | None = None):
         assert x + w <= 1280 and y + h <= 720, (self.nombre, nombre)
@@ -561,6 +585,8 @@ class Pagina:
             "legend": [{"properties": {"show": lit(len(roles.get("Series", [])) > 0 or len(roles.get("Y", [])) > 1),
                                        "position": lit("Top"), "labelColor": color(GRIS), "fontSize": lit(9)}}],
         }
+        if tipo == "clusteredBarChart":
+            base["valueAxis"] = [{"properties": {"show": lit(False), "gridlineShow": lit(False)}}]
         if objetos:
             base.update(objetos)
         if tipo in ("tableEx", "azureMap", "scatterChart"):
@@ -571,6 +597,13 @@ class Pagina:
 
 def color_serie(hex_: str) -> dict:
     return {"dataPoint": [{"properties": {"fill": color(hex_)}}]}
+
+
+def color_por_valor(campo: dict, valor: str, hex_: str) -> dict:
+    """Color fijo para una serie (por ejemplo, el sentido "Sale de Colombia" con el color de acento)."""
+    return {"properties": {"fill": color(hex_)},
+            "selector": {"data": [{"scopeId": {"Comparison": {
+                "ComparisonKind": 0, "Left": campo, "Right": {"Literal": {"Value": f"'{valor}'"}}}}}]}}
 
 
 def etiquetas(mostrar=True, unidades=0) -> dict:
@@ -608,12 +641,18 @@ def paginas() -> list[Pagina]:
     p.tarjeta("kpiVariacion", 24 + (w + 16), 92, w, 92, "Variación vs año anterior", "Pasajeros vs mismos meses del año anterior")
     p.tarjeta("kpiCarga", 24 + 2 * (w + 16), 92, w, 92, "Carga (t)", "Carga y correo (toneladas)")
     p.tarjeta("kpiOcupacion", 24 + 3 * (w + 16), 92, w, 92, "Ocupación", "Ocupación de vuelos regulares")
-    p.grafica("mapaAeropuertos", 24, 200, 560, 496, "azureMap",
+    # Mapa sin Azure Maps (pide iniciar sesión): dispersión con longitud y latitud, sin ejes
+    sin_eje = [{"properties": {"show": lit(False), "gridlineShow": lit(False), "showAxisTitle": lit(False)}}]
+    p.grafica("mapaAeropuertos", 24, 200, 560, 496, "scatterChart",
               {"Category": [(col("Aeropuertos", "Ciudad aeropuerto"), "Aeropuerto")],
-               "Y": [(prom("Aeropuertos", "Latitud"), "Latitud")],
-               "X": [(prom("Aeropuertos", "Longitud"), "Longitud")],
-               "Size": [(med("Pasajeros por aeropuerto"), "Pasajeros")]},
-              "Pasajeros por aeropuerto (salen + llegan)")
+               "X": [(med("Longitud del mapa"), "Longitud")],
+               "Y": [(med("Latitud del mapa"), "Latitud")],
+               "Size": [(med("Pasajeros aeropuertos del mapa"), "Pasajeros")]},
+              "Los 12 aeropuertos con más pasajeros, ubicados por latitud y longitud",
+              objetos={"categoryAxis": sin_eje, "valueAxis": sin_eje,
+                       "categoryLabels": [{"properties": {"show": lit(True), "color": color(TEXTO),
+                                                          "fontSize": lit(9)}}],
+                       **color_serie(ACENTO)})
     p.grafica("topRutas", 600, 200, 656, 496, "clusteredBarChart",
               {"Category": [(col("Rutas", "Nombre ruta"), "Ruta")],
                "Y": [(med("Pasajeros top 10 rutas"), "Pasajeros")]},
@@ -668,35 +707,36 @@ def paginas() -> list[Pagina]:
                           (med("Ocupación"), "Ocupación")]},
               "Aerolíneas en el año elegido",
               orden={"campo": med("Pasajeros nacionales"), "dir": "Descending"})
+    p.sin_filtro("filtroAnio", "participacion", "hhi")
     ps.append(p)
 
     # 4. Nacional e internacional -------------------------------------------
     p = Pagina("p4_nacional_internacional", "Nacional e internacional")
     encabezado(p, "Nacional e internacional: ¿dónde está el crecimiento?",
                "Las barras muestran todos los años; los dos gráficos de abajo, el año elegido.", trafico=False)
-    p.grafica("paxAnio", 24, 92, 760, 300, "columnChart",
+    p.grafica("paxAnio", 24, 92, 760, 268, "columnChart",
               {"Category": [(ANIO, "Año")],
                "Y": [(med("Pasajeros nacionales"), "Nacionales"), (med("Pasajeros internacionales"), "Internacionales")]},
               "Pasajeros por año (2026: enero a junio)",
               orden={"campo": ANIO, "dir": "Ascending"})
-    p.grafica("pctInternacional", 800, 92, 456, 300, "lineChart",
+    p.grafica("pctInternacional", 800, 92, 456, 268, "lineChart",
               {"Category": [(ANIO, "Año")], "Y": [(med("% internacional"), "% internacional")]},
               "Parte internacional de los pasajeros",
               orden={"campo": ANIO, "dir": "Ascending"},
               objetos={**color_serie(ACENTO), **etiquetas(True, 0)})
-    p.grafica("topPaises", 24, 408, 608, 288, "clusteredBarChart",
+    p.grafica("topPaises", 24, 376, 608, 320, "clusteredBarChart",
               {"Category": [(col("Trafico", "País exterior"), "País")],
                "Y": [(med("Pasajeros internacionales top 10 países"), "Pasajeros")]},
               "Los 10 países con más viajeros",
               orden={"campo": med("Pasajeros internacionales top 10 países"), "dir": "Descending"},
               objetos={**color_serie(ACENTO), **etiquetas(True, 0)})
-    p.grafica("topRutasInt", 648, 408, 608, 288, "clusteredBarChart",
+    p.grafica("topRutasInt", 648, 376, 608, 320, "clusteredBarChart",
               {"Category": [(col("Rutas", "Nombre ruta"), "Ruta")],
                "Y": [(med("Pasajeros internacionales top 10 rutas"), "Pasajeros")]},
               "Las 10 rutas internacionales más grandes",
               orden={"campo": med("Pasajeros internacionales top 10 rutas"), "dir": "Descending"},
               objetos={**color_serie(ACENTO), **etiquetas(True, 0)})
-    # los anios del grafico de barras no se filtran con el segmentador de año
+    p.sin_filtro("filtroAnio", "paxAnio", "pctInternacional")
     ps.append(p)
 
     # 5. Carga ---------------------------------------------------------------
@@ -704,34 +744,37 @@ def paginas() -> list[Pagina]:
     encabezado(p, "Carga: ¿por dónde y cuándo se mueve?",
                "Carga más correo en toneladas. El índice usa 2022 a 2025 (100 = mes normal).", trafico=False)
     w = (1232 - 2 * 16) // 3
-    p.tarjeta("kpiCargaT", 24, 92, w, 92, "Carga (t)", "Carga y correo (toneladas)")
-    p.tarjeta("kpiCargaInt", 24 + (w + 16), 92, w, 92, "% carga internacional", "En vuelos internacionales")
-    p.tarjeta("kpiCargaSale", 24 + 2 * (w + 16), 92, w, 92, "Carga que sale (t)", "Sale de Colombia (toneladas)")
-    p.grafica("indiceCarga", 24, 200, 608, 496, "lineChart",
+    p.tarjeta("kpiCargaT", 24, 92, w, 76, "Carga (t)", "Carga y correo (toneladas)")
+    p.tarjeta("kpiCargaInt", 24 + (w + 16), 92, w, 76, "% carga internacional", "En vuelos internacionales")
+    p.tarjeta("kpiCargaSale", 24 + 2 * (w + 16), 92, w, 76, "Carga que sale (t)", "Sale de Colombia (toneladas)")
+    p.grafica("indiceCarga", 24, 184, 608, 512, "lineChart",
               {"Category": [(col("Calendario", "Nombre mes"), "Mes")],
                "Y": [(med("Índice de carga"), "Índice")],
                "Series": [(col("Trafico", "Sentido"), "Sentido")]},
               "Índice de carga por mes y sentido",
-              orden={"campo": col("Calendario", "Nombre mes"), "dir": "Ascending"})
-    p.grafica("topRutasCarga", 648, 200, 608, 240, "clusteredBarChart",
+              orden={"campo": col("Calendario", "Nombre mes"), "dir": "Ascending"},
+              objetos={"dataPoint": [color_por_valor(col("Trafico", "Sentido"), "Sale de Colombia", ACENTO),
+                                     color_por_valor(col("Trafico", "Sentido"), "Entra a Colombia", "#a3acb2"),
+                                     color_por_valor(col("Trafico", "Sentido"), "Nacional", "#d0d6d9")]})
+    p.grafica("topRutasCarga", 648, 184, 608, 276, "clusteredBarChart",
               {"Category": [(col("Rutas", "Nombre ruta"), "Ruta")],
-               "Y": [(med("Carga top 10 rutas"), "Toneladas")]},
-              "Las 10 rutas con más carga (toneladas)",
-              orden={"campo": med("Carga top 10 rutas"), "dir": "Descending"},
-              objetos={**color_serie(ACENTO), **etiquetas(True, 0)})
-    p.grafica("topAerolineasCarga", 648, 456, 608, 240, "clusteredBarChart",
+               "Y": [(med("Carga top 8 rutas"), "Toneladas")]},
+              "Las 8 rutas con más carga (toneladas)",
+              orden={"campo": med("Carga top 8 rutas"), "dir": "Descending"},
+              objetos={**color_serie(ACENTO), **etiquetas(True, 1)})
+    p.grafica("topAerolineasCarga", 648, 476, 608, 220, "clusteredBarChart",
               {"Category": [(col("Aerolineas", "Aerolínea"), "Aerolínea")],
-               "Y": [(med("Carga top 8 aerolíneas"), "Toneladas")]},
-              "Las 8 aerolíneas con más carga (toneladas)",
-              orden={"campo": med("Carga top 8 aerolíneas"), "dir": "Descending"},
-              objetos={**color_serie(ACENTO), **etiquetas(True, 0)})
+               "Y": [(med("Carga top 6 aerolíneas"), "Toneladas")]},
+              "Las 6 aerolíneas con más carga (toneladas)",
+              orden={"campo": med("Carga top 6 aerolíneas"), "dir": "Descending"},
+              objetos={**color_serie(ACENTO), **etiquetas(True, 1)})
     ps.append(p)
 
     # 6. Control de datos ----------------------------------------------------
     p = Pagina("p6_control", "Control de datos")
     p.texto("titulo", 24, 12, 1232, 64, "Control: totales por año",
-            "Para comparar contra resultados/10_resumen_anual.csv y resultados/16_ocupacion.csv (SQL). "
-            "Deben dar exactamente lo mismo.")
+            "Para comparar contra resultados/10_resumen_anual.csv (SQL): deben dar exactamente lo mismo. "
+            "Aquí la ocupación junta nacional e internacional; resultados/16_ocupacion.csv la separa.")
     p.grafica("tablaControl", 24, 92, 1232, 320, "tableEx",
               {"Values": [(ANIO, "Año"), (med("Pasajeros"), "Pasajeros"),
                           (med("Pasajeros nacionales"), "Nacionales"),
@@ -803,7 +846,8 @@ def escribir_informe() -> None:
         (cp / "visuals").mkdir(parents=True, exist_ok=True)
         (cp / "page.json").write_text(json.dumps({
             "$schema": f"{SCHEMA}/page/2.0.0/schema.json", "name": p.nombre, "displayName": p.mostrar,
-            "displayOption": "FitToPage", "height": 720, "width": 1280}, indent=2, ensure_ascii=False),
+            "displayOption": "FitToPage", "height": 720, "width": 1280,
+            **({"visualInteractions": p.interacciones} if p.interacciones else {})}, indent=2, ensure_ascii=False),
             encoding="utf-8")
         for v in p.visuales:
             cv = cp / "visuals" / v["name"]

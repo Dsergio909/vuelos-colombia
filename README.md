@@ -34,7 +34,7 @@ Cinco páginas, una por pregunta, y una sexta de control que muestra los totales
 
 | Página | Qué responde |
 |---|---|
-| Resumen y rutas | Cuántos pasajeros, cuánta carga, y las rutas principales en el mapa |
+| Resumen y rutas | Cuántos pasajeros, cuánta carga, las 10 rutas principales y los 12 aeropuertos más grandes ubicados por latitud y longitud |
 | Temporadas | Qué meses se vuela más (índice 100 = mes normal) |
 | Aerolíneas | Quién tiene qué parte del mercado y cómo cambió desde 2022 |
 | Nacional e internacional | Cómo crece cada uno y a qué países se viaja |
@@ -115,6 +115,7 @@ Para abrir el tablero: Power BI Desktop (gratis). Abre `powerbi/vuelos-colombia.
 - Tampoco dicen qué tipo de carga se mueve. La relación entre el pico de abril y las flores es una hipótesis.
 - Las rutas son entre aeropuertos. Un pasajero que va de Cali a Madrid por Bogotá puede quedar como dos trayectos.
 - El pronóstico es simple a propósito. Un modelo con tendencia o con más años serviría mejor para lo internacional.
+- El mapa no tiene fondo con el contorno del país. El mapa de Power BI (Azure Maps) pide iniciar sesión con una cuenta, así que usé un gráfico de dispersión con la latitud y la longitud de cada aeropuerto. Se lee igual y lo puede abrir cualquiera.
 
 ## Cómo explicarlo en 2 minutos
 

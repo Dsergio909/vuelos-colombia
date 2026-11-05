@@ -3,10 +3,10 @@
   "name": "topRutasInt",
   "position": {
     "x": 648,
-    "y": 408,
+    "y": 376,
     "z": 5000,
     "width": 608,
-    "height": 288,
+    "height": 320,
     "tabOrder": 5000
   },
   "visual": {
@@ -106,39 +106,17 @@
       "valueAxis": [
         {
           "properties": {
-            "labelColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#5b6770'"
-                    }
-                  }
-                }
-              }
-            },
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "9D"
-                }
-              }
-            },
-            "showAxisTitle": {
+            "show": {
               "expr": {
                 "Literal": {
                   "Value": "false"
                 }
               }
             },
-            "gridlineColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#eceef0'"
-                    }
-                  }
+            "gridlineShow": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

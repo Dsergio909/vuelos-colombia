@@ -102,6 +102,40 @@ table Medidas
 		displayFolder: Rutas
 		lineageTag: c2fce2a2-5e17-51ea-af9f-2df8e91637be
 
+	/// Pasajeros (salen + llegan) de los 12 aeropuertos de Colombia con más pasajeros; el resto queda en blanco.
+	measure 'Pasajeros aeropuertos del mapa' =
+			VAR pax = CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
+			VAR puesto =
+			    RANKX (
+			        ALLSELECTED ( Aeropuertos[Ciudad aeropuerto] ),
+			        CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) ),, DESC, DENSE
+			    )
+			RETURN
+			    IF ( NOT ISBLANK ( pax ) && puesto <= 12, pax )
+		formatString: #,0
+		displayFolder: Rutas
+		lineageTag: 95b10e2f-b19a-5794-80ed-0e9f16c6d2c4
+
+	/// Latitud del aeropuerto, solo si está entre los 12 del mapa (el mapa es un gráfico de dispersión).
+	measure 'Latitud del mapa' =
+			IF (
+			    NOT ISBLANK ( [Pasajeros aeropuertos del mapa] ),
+			    CALCULATE ( AVERAGE ( Aeropuertos[Latitud] ), KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
+			)
+		formatString: 0.0000
+		displayFolder: Rutas
+		lineageTag: 7279b6ac-570a-5e61-b8a3-981c7e10d46c
+
+	/// Longitud del aeropuerto, solo si está entre los 12 del mapa.
+	measure 'Longitud del mapa' =
+			IF (
+			    NOT ISBLANK ( [Pasajeros aeropuertos del mapa] ),
+			    CALCULATE ( AVERAGE ( Aeropuertos[Longitud] ), KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
+			)
+		formatString: 0.0000
+		displayFolder: Rutas
+		lineageTag: 5a5f6a88-d484-5e21-9709-5eea2435d9a3
+
 	/// Pasajeros solo para las 10 rutas más grandes de lo que esté filtrado; el resto queda en blanco y no se dibuja.
 	measure 'Pasajeros top 10 rutas' =
 			IF (
@@ -214,25 +248,25 @@ table Medidas
 		displayFolder: Carga
 		lineageTag: 8bd25b73-ae25-5e54-90da-7f84336d4eb7
 
-	/// Toneladas solo para las 10 rutas con más carga.
-	measure 'Carga top 10 rutas' =
+	/// Toneladas solo para las 8 rutas con más carga.
+	measure 'Carga top 8 rutas' =
 			IF (
-			    RANKX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Carga (t)],, DESC, DENSE ) <= 10,
+			    RANKX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Carga (t)],, DESC, DENSE ) <= 8,
 			    [Carga (t)]
 			)
 		formatString: #,0
 		displayFolder: Carga
-		lineageTag: 6facbc71-9572-5619-b007-b22e150937e7
+		lineageTag: 983c8cca-979d-54eb-b614-67aa1135615f
 
-	/// Toneladas solo para las 8 aerolíneas con más carga.
-	measure 'Carga top 8 aerolíneas' =
+	/// Toneladas solo para las 6 aerolíneas con más carga.
+	measure 'Carga top 6 aerolíneas' =
 			IF (
-			    RANKX ( ALLSELECTED ( Aerolineas[Aerolínea] ), [Carga (t)],, DESC, DENSE ) <= 8,
+			    RANKX ( ALLSELECTED ( Aerolineas[Aerolínea] ), [Carga (t)],, DESC, DENSE ) <= 6,
 			    [Carga (t)]
 			)
 		formatString: #,0
 		displayFolder: Carga
-		lineageTag: 77c12dcd-1f43-5092-bda3-d2f3a310a5cd
+		lineageTag: c46d65dc-4639-5542-b0a4-88685b7e6aa6
 
 	column Columna
 		dataType: string

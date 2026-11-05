@@ -174,6 +174,52 @@ CALCULATE ( [Pasajeros], USERELATIONSHIP ( Trafico[Clave origen], Aeropuertos[Cl
     + CALCULATE ( [Pasajeros], USERELATIONSHIP ( Trafico[Clave destino], Aeropuertos[Clave] ) )
 ```
 
+### Pasajeros aeropuertos del mapa
+
+Pasajeros (salen + llegan) de los 12 aeropuertos de Colombia con más pasajeros; el resto queda en blanco.
+
+Formato: `#,0`
+
+```dax
+Pasajeros aeropuertos del mapa =
+VAR pax = CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
+VAR puesto =
+    RANKX (
+        ALLSELECTED ( Aeropuertos[Ciudad aeropuerto] ),
+        CALCULATE ( [Pasajeros por aeropuerto], KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) ),, DESC, DENSE
+    )
+RETURN
+    IF ( NOT ISBLANK ( pax ) && puesto <= 12, pax )
+```
+
+### Latitud del mapa
+
+Latitud del aeropuerto, solo si está entre los 12 del mapa (el mapa es un gráfico de dispersión).
+
+Formato: `0.0000`
+
+```dax
+Latitud del mapa =
+IF (
+    NOT ISBLANK ( [Pasajeros aeropuertos del mapa] ),
+    CALCULATE ( AVERAGE ( Aeropuertos[Latitud] ), KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
+)
+```
+
+### Longitud del mapa
+
+Longitud del aeropuerto, solo si está entre los 12 del mapa.
+
+Formato: `0.0000`
+
+```dax
+Longitud del mapa =
+IF (
+    NOT ISBLANK ( [Pasajeros aeropuertos del mapa] ),
+    CALCULATE ( AVERAGE ( Aeropuertos[Longitud] ), KEEPFILTERS ( Aeropuertos[País] = "COLOMBIA" ) )
+)
+```
+
 ### Pasajeros top 10 rutas
 
 Pasajeros solo para las 10 rutas más grandes de lo que esté filtrado; el resto queda en blanco y no se dibuja.
@@ -325,30 +371,30 @@ RETURN
     AVERAGEX ( indices, [@indice] )
 ```
 
-### Carga top 10 rutas
+### Carga top 8 rutas
 
-Toneladas solo para las 10 rutas con más carga.
+Toneladas solo para las 8 rutas con más carga.
 
 Formato: `#,0`
 
 ```dax
-Carga top 10 rutas =
+Carga top 8 rutas =
 IF (
-    RANKX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Carga (t)],, DESC, DENSE ) <= 10,
+    RANKX ( ALLSELECTED ( Rutas[Nombre ruta] ), [Carga (t)],, DESC, DENSE ) <= 8,
     [Carga (t)]
 )
 ```
 
-### Carga top 8 aerolíneas
+### Carga top 6 aerolíneas
 
-Toneladas solo para las 8 aerolíneas con más carga.
+Toneladas solo para las 6 aerolíneas con más carga.
 
 Formato: `#,0`
 
 ```dax
-Carga top 8 aerolíneas =
+Carga top 6 aerolíneas =
 IF (
-    RANKX ( ALLSELECTED ( Aerolineas[Aerolínea] ), [Carga (t)],, DESC, DENSE ) <= 8,
+    RANKX ( ALLSELECTED ( Aerolineas[Aerolínea] ), [Carga (t)],, DESC, DENSE ) <= 6,
     [Carga (t)]
 )
 ```
