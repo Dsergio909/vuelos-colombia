@@ -97,7 +97,7 @@ Sergio pidió auditarlo como los otros proyectos. Antigravity revisó el SQL y e
 
 Descartado por la sesión principal (no era real): filas de `eq` con sillas en 0 y pasajeros, o con más pasajeros que sillas (hay 0), y aeropuertos de Bogotá clasificados como punto a punto (4 pasajeros en 2025).
 
-Resultado: **39 pruebas pasan** (antes 38).
+Resultado: **39 pruebas pasan** (antes 38) y la copia limpia da los mismos resultados. Con un turno corto de Power BI: **56 de 56 cifras del tablero iguales al SQL** (ya con los 138 pasajeros menos de 2022), 7.188 rutas en los dos, 2026 con 6 meses en la página de control y BOG-IDA como Bogotá - Puerto Inírida (nacional) y Bogotá - Idaho (internacional). PDF y capturas exportados de nuevo.
 
 ## Pendiente
 
