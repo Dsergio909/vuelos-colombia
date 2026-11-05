@@ -1,6 +1,6 @@
 # Vuelos en Colombia: rutas, temporadas y aerolíneas
 
-[English version](README.en.md)
+[English version](README.en.md) · ![Pruebas](https://github.com/Dsergio909/vuelos-colombia/actions/workflows/pruebas.yml/badge.svg)
 
 Quería saber qué rutas mueven más pasajeros y carga en Colombia, en qué meses se vuela más y con qué aerolíneas. Tomé los datos abiertos de la Aerocivil, de enero de 2020 a junio de 2026, los limpié con SQL y Power Query y armé un tablero en Power BI.
 

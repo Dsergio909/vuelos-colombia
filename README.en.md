@@ -1,6 +1,6 @@
 # Flights in Colombia: routes, seasons and airlines
 
-[Versión en español](README.md)
+[Versión en español](README.md) · ![Tests](https://github.com/Dsergio909/vuelos-colombia/actions/workflows/pruebas.yml/badge.svg)
 
 I wanted to know which routes carry the most passengers and cargo in Colombia, which months are busiest and which airlines fly them. I took the open data from Aerocivil (Colombia's civil aviation authority), January 2020 to June 2026, cleaned it with SQL and Power Query and built a Power BI dashboard.
 
