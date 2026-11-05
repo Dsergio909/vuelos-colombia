@@ -29,6 +29,15 @@ table Trafico
 
 		annotation SummarizationSetBy = User
 
+	column 'Clave ruta'
+		dataType: string
+		isHidden
+		lineageTag: cefa923f-f763-57ad-a56c-c7e25f301002
+		summarizeBy: none
+		sourceColumn: Clave ruta
+
+		annotation SummarizationSetBy = User
+
 	column Origen
 		dataType: string
 		isHidden
@@ -142,8 +151,11 @@ table Trafico
 				        {"Destino", each Text.Upper(Text.Trim(_)), type text},
 				        {"País origen", each Record.FieldOrDefault(PaisLimpio, _ ?? "", null), type text},
 				        {"País destino", each Record.FieldOrDefault(PaisLimpio, _ ?? "", null), type text}}),
-				    // 10 filas de carga dicen "internacional" pero no tocan Colombia (por ejemplo Montevideo - Ezeiza): fuera
-				    TocaColombia = Table.SelectRows(Textos, each [País origen] = "COLOMBIA" or [País destino] = "COLOMBIA"),
+				    // El tráfico debe cuadrar con los países: nacional = los dos extremos en Colombia; internacional = uno solo.
+				    // Quedan fuera 10 filas de carga "internacionales" sin Colombia (Montevideo - Ezeiza) y 19 "nacionales" desde México
+				    TocaColombia = Table.SelectRows(Textos, each
+				        ([Tráfico] = "N" and [País origen] = "COLOMBIA" and [País destino] = "COLOMBIA")
+				        or ([Tráfico] = "I" and (([País origen] = "COLOMBIA") <> ([País destino] = "COLOMBIA")))),
 				    // 3. Tipos. Los números vienen con punto decimal: se leen con cultura en-US
 				    Tipos = Table.TransformColumnTypes(TocaColombia, {{"Año", Int64.Type}, {"Mes", Int64.Type},
 				        {"Pasajeros", Int64.Type}, {"Carga kg", type number}}, "en-US"),
@@ -158,7 +170,9 @@ table Trafico
 				    // 6. Ruta sin dirección: BOG-MDE y MDE-BOG son la misma ruta
 				    Ruta = Table.AddColumn(Palabras, "Ruta",
 				        each if [Origen] < [Destino] then [Origen] & "-" & [Destino] else [Destino] & "-" & [Origen], type text),
-				    Sentido = Table.AddColumn(Ruta, "Sentido",
+				    // El mismo código puede ser de Colombia y del exterior (IDA = Puerto Inírida e Idaho): la ruta se identifica con su tráfico
+				    ClaveRuta = Table.AddColumn(Ruta, "Clave ruta", each [Ruta] & "|" & [Tráfico], type text),
+				    Sentido = Table.AddColumn(ClaveRuta, "Sentido",
 				        each if [Tráfico] = "Nacional" then "Nacional"
 				             else if [País origen] = "COLOMBIA" then "Sale de Colombia" else "Entra a Colombia", type text),
 				    // Para mostrar el país con sus tildes
@@ -173,7 +187,7 @@ table Trafico
 				    // Claves para unir con Aeropuertos (el mismo código puede existir en dos países)
 				    ClaveOrigen = Table.AddColumn(PaisExterior, "Clave origen", each [Origen] & "|" & [País origen], type text),
 				    ClaveDestino = Table.AddColumn(ClaveOrigen, "Clave destino", each [Destino] & "|" & [País destino], type text),
-				    Final = Table.SelectColumns(ClaveDestino, {"Fecha", "Sigla", "Ruta", "Origen", "Destino", "Clave origen", "Clave destino",
+				    Final = Table.SelectColumns(ClaveDestino, {"Fecha", "Sigla", "Ruta", "Clave ruta", "Origen", "Destino", "Clave origen", "Clave destino",
 				        "Tráfico", "Tipo de vuelo", "Sentido", "País exterior", "Pasajeros", "Carga kg"})
 				in
 				    Final

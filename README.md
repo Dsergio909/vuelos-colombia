@@ -15,7 +15,7 @@ Entre 2022 y 2025 los pasajeros nacionales pasaron de 32,7 a 32,9 millones: apen
 En 2022 Viva y Ultra tenían el 24,7 % de los pasajeros nacionales. En los datos, Viva reporta hasta febrero de 2023 y Ultra hasta marzo. Ese año Avianca y LATAM (con sus filiales) pasaron del 62,3 % al 77,9 %, y el índice de concentración HHI subió de 2.483 a 3.219 (por encima de 2.500 se considera muy concentrado). En 2025 JetSMART ya tenía el 13,5 %, Avianca y LATAM bajaron a 68,7 % y el HHI quedó en 2.738.
 
 **3. Casi todo pasa por Bogotá, pero las rutas que crecen no pasan por allá.**
-El 69,5 % de los pasajeros nacionales de 2025 volaron en una ruta que empieza o termina en El Dorado. La ruta más grande es Bogotá - Medellín, con 4,0 millones de pasajeros en 2025. Las rutas punto a punto (por ejemplo Medellín - Cartagena o Cali - Cartagena) eran las de Viva: cayeron 20,4 % entre 2022 y 2024. En 2025 crecieron 5,2 %, mientras las rutas de Bogotá cayeron 3,8 %.
+El 69,5 % de los pasajeros nacionales de 2025 volaron en una ruta que empieza o termina en El Dorado. Ojo: Aerocivil cuenta pasajeros por tramo de vuelo, así que quien va de Cali a Cartagena con escala en Bogotá cuenta en los dos tramos. La ruta más grande es Bogotá - Medellín, con 4,0 millones de pasajeros en 2025. Las rutas punto a punto (por ejemplo Medellín - Cartagena o Cali - Cartagena) eran las de Viva: cayeron 20,4 % entre 2022 y 2024. En 2025 crecieron 5,2 %, mientras las rutas de Bogotá cayeron 3,8 %.
 
 **4. Diciembre es el mes más fuerte y febrero el más flojo.**
 Con un índice donde 100 es un mes normal, en vuelos nacionales diciembre marca 110,7 y febrero 88,4 (promedio de 2022 a 2025). O sea, en diciembre se mueve un 25 % más de pasajeros que en febrero. Julio y agosto son la segunda temporada alta. Si yo tuviera que planear capacidad o personal, ahí es donde me fijaría primero.
@@ -59,7 +59,7 @@ Lo que hay que tener en cuenta:
 - **Las cifras de 2022 a 2025 son provisionales.** Aerocivil las puede corregir. Por eso el repo trae una copia fija, bajada el 4 de noviembre de 2026, y una prueba que avisa si la fuente cambió.
 - **2026 llega hasta junio.** No se compara 2026 contra años completos.
 - **2020 y 2021 están deformados por la pandemia** (de abril a agosto de 2020 casi no hubo vuelos de pasajeros). Las temporadas se calculan con 2022 a 2025.
-- **Solo tráfico de Colombia.** Quité 12.240 filas de tráfico "Especial": vuelos entre dos países extranjeros, como Panamá - La Habana, que hace una aerolínea colombiana. También quité 10 filas de carga marcadas como internacionales que no tocan Colombia (Montevideo - Ezeiza, por ejemplo).
+- **Solo tráfico de Colombia.** Quité 12.240 filas de tráfico "Especial": vuelos entre dos países extranjeros, como Panamá - La Habana, que hace una aerolínea colombiana. También quité 29 filas cuyo tráfico no cuadra con los países: 10 de carga marcadas como internacionales que no tocan Colombia (Montevideo - Ezeiza, por ejemplo) y 19 marcadas como nacionales que salen de México (138 pasajeros en 2022). Y como un mismo código puede ser un aeropuerto de Colombia y otro del exterior (IDA es Puerto Inírida y también Idaho), cada ruta se identifica por sus dos códigos y por si es nacional o internacional.
 - **Carga incluye correo**, porque así la reporta Aerocivil.
 - La marca comercial de cada aerolínea (por ejemplo, AIRES es LATAM Colombia y FAST COLOMBIA era Viva Air) la puse yo, en una lista corta dentro de [sql/02_limpiar.sql](sql/02_limpiar.sql). Las demás aerolíneas usan el nombre que reportan.
 
@@ -72,7 +72,7 @@ Los datos derivados de este repo (la copia en `datos/fuente/` y los CSV de `resu
 1. **Datos:** un script baja los dos conjuntos por la API de datos.gov.co (sin clave, en páginas de 50.000 filas, con reintentos) y comprueba que llegaron todas las filas.
 2. **Limpieza en SQL (DuckDB):** tipos, 52 filas sin pasajeros que cuento como 0 y dejo marcadas, ciudades escritas de dos formas ("CALI" y "SANTIAGO DE CALI"), una misma aerolínea con varios nombres y rutas sin dirección (Bogotá - Medellín suma los dos sentidos).
 3. **Consultas:** 10 consultas de análisis en archivos `.sql` numerados y comentados (incluye un informe de calidad de datos y el pronóstico), con CTE y funciones de ventana (`rank`, `lag`, participaciones y acumulados).
-4. **Pruebas:** 38 pruebas que corren en GitHub Actions con cada cambio, y 2 más que se corren a mano y comparan contra la API en vivo. Revisan que los totales por año cuadren con los que calcula la propia API, que la limpieza no pierda ni duplique filas y que cada cifra de este README salga de los datos.
+4. **Pruebas:** 39 pruebas que corren en GitHub Actions con cada cambio, y 2 más que se corren a mano y comparan contra la API en vivo. Revisan que los totales por año cuadren con los que calcula la propia API, que la limpieza no pierda ni duplique filas y que cada cifra de este README salga de los datos.
 5. **Power BI:** Power Query lee la misma copia y la limpia con los mismos pasos. Encima van las medidas DAX y las seis páginas.
 
 El plan y las preguntas los definí yo. El código lo escribió Claude (IA) y yo revisé cada cifra contra la fuente.

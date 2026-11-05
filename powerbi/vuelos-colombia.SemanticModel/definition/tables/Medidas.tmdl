@@ -94,6 +94,12 @@ table Medidas
 		displayFolder: Operación
 		lineageTag: 9d1506ae-5c21-5ea5-901a-b569400fa6a6
 
+	/// Meses con datos en el periodo filtrado. 2026 tiene 6 (enero a junio): no se compara con años completos.
+	measure 'Meses con datos' = DISTINCTCOUNT ( Trafico[Fecha] )
+		formatString: 0
+		displayFolder: Operación
+		lineageTag: 4b4d0d7f-fc8b-5727-9464-3c6202d2cd6e
+
 	/// Pasajeros que salen más los que llegan. Usa las dos relaciones inactivas con Aeropuertos.
 	measure 'Pasajeros por aeropuerto' =
 			CALCULATE ( [Pasajeros], USERELATIONSHIP ( Trafico[Clave origen], Aeropuertos[Clave] ) )

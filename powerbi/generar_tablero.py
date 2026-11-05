@@ -60,6 +60,7 @@ TABLAS = {
         ("Fecha", F, "mmm yyyy", "none", True, {}),
         ("Sigla", T, None, "none", True, {}),
         ("Ruta", T, None, "none", True, {}),
+        ("Clave ruta", T, None, "none", True, {}),
         ("Origen", T, None, "none", True, {}),
         ("Destino", T, None, "none", True, {}),
         ("Clave origen", T, None, "none", True, {}),
@@ -75,6 +76,7 @@ TABLAS = {
         ("Fecha", F, "mmm yyyy", "none", True, {}),
         ("Sigla", T, None, "none", True, {}),
         ("Ruta", T, None, "none", True, {}),
+        ("Clave ruta", T, None, "none", True, {}),
         ("Tráfico", T, None, "none", True, {}),
         ("Tipo de vuelo", T, None, "none", True, {}),
         ("Vuelos", I, "#,0", "sum", True, {}),
@@ -92,6 +94,7 @@ TABLAS = {
         ("Longitud", D, "0.0000", "none", False, {"dataCategory": "Longitude"}),
     ]),
     "Rutas": ("21_Rutas.pq", [
+        ("Clave ruta", T, None, "none", True, {}),
         ("Ruta", T, None, "none", False, {}),
         ("Nombre ruta", T, None, "none", False, {}),
         ("Ciudad A", T, None, "none", False, {}),
@@ -131,8 +134,8 @@ RELACIONES = [
     ("Equipo.Fecha", "Calendario.Fecha", True),
     ("Trafico.Sigla", "Aerolineas.Sigla", True),
     ("Equipo.Sigla", "Aerolineas.Sigla", True),
-    ("Trafico.Ruta", "Rutas.Ruta", True),
-    ("Equipo.Ruta", "Rutas.Ruta", True),
+    ("Trafico.Clave ruta", "Rutas.Clave ruta", True),
+    ("Equipo.Clave ruta", "Rutas.Clave ruta", True),
     ("Trafico.Tráfico", "TipoTrafico.Tráfico", True),
     ("Equipo.Tráfico", "TipoTrafico.Tráfico", True),
     # Aeropuertos juega dos papeles (origen y destino): relaciones inactivas que
@@ -203,6 +206,9 @@ RETURN
     ("Operación", "Vuelos", "#,0",
      "Número de vuelos (conjunto Tráfico por Equipo).",
      "SUM ( Equipo[Vuelos] )"),
+    ("Operación", "Meses con datos", "0",
+     "Meses con datos en el periodo filtrado. 2026 tiene 6 (enero a junio): no se compara con años completos.",
+     "DISTINCTCOUNT ( Trafico[Fecha] )"),
     ("Rutas", "Pasajeros por aeropuerto", "#,0",
      "Pasajeros que salen más los que llegan. Usa las dos relaciones inactivas con Aeropuertos.",
      """CALCULATE ( [Pasajeros], USERELATIONSHIP ( Trafico[Clave origen], Aeropuertos[Clave] ) )
@@ -776,7 +782,7 @@ def paginas() -> list[Pagina]:
             "Para comparar contra resultados/10_resumen_anual.csv (SQL): deben dar exactamente lo mismo. "
             "Aquí la ocupación junta nacional e internacional; resultados/16_ocupacion.csv la separa.")
     p.grafica("tablaControl", 24, 92, 1232, 320, "tableEx",
-              {"Values": [(ANIO, "Año"), (med("Pasajeros"), "Pasajeros"),
+              {"Values": [(ANIO, "Año"), (med("Meses con datos"), "Meses"), (med("Pasajeros"), "Pasajeros"),
                           (med("Pasajeros nacionales"), "Nacionales"),
                           (med("Pasajeros internacionales"), "Internacionales"),
                           (med("Carga (t)"), "Carga (t)"), (med("Ocupación"), "Ocupación"),

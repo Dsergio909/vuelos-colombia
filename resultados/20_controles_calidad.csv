@@ -5,9 +5,14 @@ orden,control,esperado,obtenido,estado
 4,Pasajeros vacios en la fuente (se cuentan como 0),52,52,Pasa
 5,Valores negativos de pasajeros o carga,0,0,Pasa
 6,Filas fuera del alcance: trafico Especial,12240,12240,Pasa
-7,Filas fuera del alcance: internacionales sin Colombia,10,10,Pasa
-8,Paises con tilde sin corregir,0,0,Pasa
+7,"Filas fuera del alcance: el trafico no cuadra con los paises (10 internacionales sin Colombia, 19 nacionales desde Mexico)",29,29,Pasa
+8,Paises con tilde sin corregir (origen o destino),0,0,Pasa
 9,Filas de trafico de Colombia sin ciudad o sin aerolinea,0,0,Pasa
 10,Aeropuertos repetidos (mismo codigo y pais),0,0,Pasa
 11,"Combinaciones repetidas (aerolinea, mes, ruta, trafico, tipo de vuelo); se dejan",73,73,Pasa
 12,Meses con datos (enero 2020 a junio 2026),78,78,Pasa
+13,Rutas repetidas (misma ruta y trafico),0,0,Pasa
+14,Trafico por Equipo: años o meses que no se pudieron leer,0,0,Pasa
+15,"Trafico por Equipo: valores negativos de vuelos, sillas, pasajeros o carga",0,0,Pasa
+16,Trafico por Equipo: filas nacionales o internacionales que no cuadran con los paises,0,0,Pasa
+17,Trafico por Equipo: meses con datos (enero 2020 a junio 2026),78,78,Pasa

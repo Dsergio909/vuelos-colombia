@@ -15,8 +15,9 @@
 --   6. Paises: llegan con y sin tilde ("PANAMA" y "PANAMÁ", "ESPAÑA" y "ESPANA").
 --      Se quitan las tildes para que cada pais quede una sola vez.
 --   7. Alcance: el trafico "E" (Especial) son vuelos entre dos paises extranjeros
---      (por ejemplo Panama - La Habana). Tampoco cuentan 10 filas de carga marcadas
---      como internacionales que no tocan Colombia (por ejemplo Montevideo - Ezeiza).
+--      (por ejemplo Panama - La Habana). Tampoco cuentan 29 filas cuyo trafico no cuadra
+--      con los paises: 10 de carga marcadas como internacionales que no tocan Colombia
+--      (por ejemplo Montevideo - Ezeiza) y 19 marcadas como nacionales que salen de Mexico.
 --      Quedan en la tabla con es_colombia = false y las consultas las excluyen.
 --
 -- No se borran filas repetidas: 73 combinaciones de aerolinea, mes, ruta y tipo
@@ -67,9 +68,15 @@ select
     coalesce(try_cast(pasajeros as bigint), 0)                 as pasajeros,
     pasajeros is null                                          as pasajeros_vacio,
     coalesce(try_cast(carga_correo_kg as double), 0)           as carga_kg,
-    tr_fico_n_i in ('N', 'I')
-        and 'COLOMBIA' in (upper(strip_accents(trim(pais_origen))),
-                           upper(strip_accents(trim(pais_destino)))) as es_colombia,
+    -- Alcance: trafico de Colombia que cuadra con los paises de sus extremos.
+    -- Nacional = los dos extremos en Colombia; Internacional = un solo extremo en Colombia.
+    -- Quedan fuera 10 filas "internacionales" sin Colombia y 19 "nacionales" que salen de Mexico.
+    coalesce(
+        (tr_fico_n_i = 'N' and upper(strip_accents(trim(pais_origen))) = 'COLOMBIA'
+                           and upper(strip_accents(trim(pais_destino))) = 'COLOMBIA')
+        or (tr_fico_n_i = 'I' and (upper(strip_accents(trim(pais_origen))) = 'COLOMBIA')
+                               <> (upper(strip_accents(trim(pais_destino))) = 'COLOMBIA')),
+        false)                                                  as es_colombia,
     -- ciudad cruda sin tildes (para armar la tabla de aeropuertos)
     upper(strip_accents(trim(ciudad_origen)))                  as ciudad_origen_cruda,
     upper(strip_accents(trim(ciudad_destino)))                 as ciudad_destino_cruda,
@@ -155,15 +162,26 @@ left join aerolineas a on a.sigla = od.sigla
 left join marca_aerolinea m on m.sigla = od.sigla
 where od.es_colombia;
 
--- Nombre de cada ruta (sin direccion), con la ciudad de cada extremo
+-- Nombre de cada ruta (sin direccion), con la ciudad de cada extremo.
+-- La clave es ruta + trafico: el mismo codigo puede ser un aeropuerto de Colombia y otro
+-- del exterior (IDA es Puerto Inirida y tambien Idaho; AGU es Aguazul y Aguascalientes).
+-- Si una ruta trae dos nombres (un pais escrito de dos formas), gana el de mas pasajeros.
 create or replace table rutas as
-select
-    ruta,
-    any_value(case when origen = least(origen, destino) then ciudad_o else ciudad_d end) as ciudad_a,
-    any_value(case when origen = least(origen, destino) then ciudad_d else ciudad_o end) as ciudad_b,
-    any_value(trafico) as trafico
-from v_od
-group by ruta;
+with nombres as (
+    select
+        ruta,
+        trafico,
+        case when origen = least(origen, destino) then ciudad_o else ciudad_d end as ciudad_a,
+        case when origen = least(origen, destino) then ciudad_d else ciudad_o end as ciudad_b,
+        sum(pasajeros) as pasajeros,
+        count(*) as filas
+    from v_od
+    group by all
+)
+select ruta, ciudad_a, ciudad_b, trafico
+from nombres
+qualify row_number() over (partition by ruta, trafico
+                           order by pasajeros desc, filas desc, ciudad_a, ciudad_b) = 1;
 
 -- Tabla limpia de Trafico por Equipo (para vuelos, sillas y ocupacion)
 create or replace table eq as
@@ -188,7 +206,11 @@ select
     coalesce(try_cast(pasajeros_a_bordo as bigint), 0)    as pasajeros_a_bordo,
     coalesce(try_cast(carga_ofrecida_kg as double), 0)    as carga_ofrecida_kg,
     coalesce(try_cast(carga_correo_a_bordo_kg as double), 0) as carga_a_bordo_kg,
-    tr_fico in ('N', 'I')
-        and 'COLOMBIA' in (upper(strip_accents(trim(pais_origen))),
-                           upper(strip_accents(trim(pais_destino)))) as es_colombia
+    -- mismo alcance que en od: nacional con los dos extremos en Colombia, internacional con uno
+    coalesce(
+        (tr_fico = 'N' and upper(strip_accents(trim(pais_origen))) = 'COLOMBIA'
+                       and upper(strip_accents(trim(pais_destino))) = 'COLOMBIA')
+        or (tr_fico = 'I' and (upper(strip_accents(trim(pais_origen))) = 'COLOMBIA')
+                           <> (upper(strip_accents(trim(pais_destino))) = 'COLOMBIA')),
+        false)                                       as es_colombia
 from crudo_eq;

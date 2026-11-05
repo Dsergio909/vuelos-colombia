@@ -3,10 +3,13 @@
 -- Sale del conjunto Trafico por Equipo, que trae sillas ofrecidas por vuelo.
 -- Ocupacion = pasajeros a bordo / sillas ofrecidas.
 -- Solo vuelos regulares con sillas reportadas (los taxis aereos reportan 0 sillas).
+-- 2026 trae solo enero a junio (columna meses): sus vuelos y sillas no se comparan con años
+-- completos, y su ocupacion tampoco, porque el primer semestre no tiene diciembre ni julio.
 
 select
     anio,
     trafico,
+    count(distinct mes)               as meses,
     sum(vuelos)                       as vuelos,
     sum(sillas)                       as sillas,
     sum(pasajeros_a_bordo)            as pasajeros_a_bordo,

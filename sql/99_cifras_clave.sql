@@ -98,7 +98,7 @@ f(clave, valor, decimales) as (
     union all select 'ocupacion_nacional_2025_pct', (select pct from ocupacion where anio = 2025), 1
     -- 6. 2026 y el pronostico de julio a diciembre (sql/19_pronostico.sql)
     union all select 'nacional_s1_2026_variacion_pct',
-        100.0 * ((select sum(pasajeros) from v_od where trafico = 'Nacional' and anio = 2026)
+        100.0 * ((select sum(pasajeros) from v_od where trafico = 'Nacional' and anio = 2026 and mes <= 6)
                / (select sum(pasajeros) from v_od where trafico = 'Nacional' and anio = 2025 and mes <= 6) - 1), 1
     union all select 'pronostico_error_nacional_pct',
         (select avg(100.0 * abs(pronostico - real) / real) from pronostico where anio = 2025 and trafico = 'Nacional'), 1

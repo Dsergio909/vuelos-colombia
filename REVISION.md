@@ -83,6 +83,22 @@ También aclaré en la página de control que su ocupación junta nacional e int
 
 Entregables: `docs/tablero.pdf` (6 páginas, 436 KB) y 5 capturas en `capturas/`, sacadas de ese mismo PDF con Inkscape (sin los paneles de Power BI). No guardé `.pbix`: el proyecto en texto (`.pbip`) es la fuente y se puede revisar línea por línea en GitHub.
 
+## Auditoría externa: Antigravity (Gemini) y la sesión principal
+
+Sergio pidió auditarlo como los otros proyectos. Antigravity revisó el SQL y el README en 2 partes; la sesión principal comprobó cada hallazgo contra `datos/vuelos.duckdb` y revisó una copia limpia (38 pruebas, sin claves ni datos privados). Confirmaron el HHI, las participaciones, los índices de temporada, la ocupación como razón de sumas, que 2026 no se compara contra años completos y que el pronóstico no usa datos del futuro. **Ninguna cifra del README estaba mal.** Lo que arreglé:
+
+1. **Tabla `rutas` (02_limpiar.sql):** agrupaba solo por código de ruta y tomaba cualquier nombre. Hay códigos que son un aeropuerto de Colombia y otro del exterior (IDA es Puerto Inírida e Idaho; AGU es Aguazul y Aguascalientes), y 63 rutas mezclaban nacional e internacional. Ahora la clave es **ruta + tráfico** (7.188 rutas en vez de 7.125) y, si una ruta trae dos nombres, gana el de más pasajeros. Probé también la clave con el país de cada extremo y la descarté: separa de más, porque el mismo país viene escrito de dos formas (KOREA y COREA, BERMUDA e ISLAS CARIBE). En Power BI, `Rutas` usa la misma clave (`Clave ruta`). **Prueba nueva:** BOG-IDA nacional es Bogotá - Puerto Inírida e internacional es Bogotá - Idaho; AGU-BOG, Aguazul o Aguascalientes. No cambió ninguna cifra publicada: el top 15 de rutas sale igual.
+2. **Tráfico que no cuadra con los países:** 19 filas "nacionales" de 2022 salen de México (Aeroméxico, 138 pasajeros). Ahora el alcance es explícito: nacional = los dos extremos en Colombia; internacional = uno solo. Quedan fuera **29 filas** (estas 19 más las 10 de carga ya conocidas), igual en SQL, Power Query y en la tabla `eq` (allí hay 0). Cambió solo 2022: 138 pasajeros nacionales menos (32.719.831), y ninguna cifra del README.
+3. **99_cifras_clave.sql:** el primer semestre de 2026 ahora también lleva `mes <= 6` en el numerador. Hoy da igual, pero con la próxima descarga habría comparado más de 6 meses contra 6.
+4. **16_ocupacion.sql:** nueva columna `meses`; 2026 sale con 6 y el comentario explica que no se compara con años completos. En la página de control del tablero hay una columna "Meses" (medida nueva `Meses con datos`: 27 medidas).
+5. **README, conclusión 3:** aclara que Aerocivil cuenta pasajeros por tramo de vuelo; quien hace escala en Bogotá cuenta en los dos tramos. La cifra (69,5 %) no cambia. También explica las 29 filas y la clave de las rutas.
+6. **Controles de calidad (20_controles_calidad.sql):** de 12 a **17**. El de tildes ahora revisa país de origen y de destino; nuevos: rutas repetidas y cuatro de `eq` (fechas, negativos, tráfico que no cuadra y meses). Los 17 pasan.
+7. **Correo de los commits:** salían con el Gmail de Sergio; ahora usan su correo privado de GitHub (`noreply`), también en la configuración local del repo. La rama nunca estuvo en GitHub.
+
+Descartado por la sesión principal (no era real): filas de `eq` con sillas en 0 y pasajeros, o con más pasajeros que sillas (hay 0), y aeropuertos de Bogotá clasificados como punto a punto (4 pasajeros en 2025).
+
+Resultado: **39 pruebas pasan** (antes 38).
+
 ## Pendiente
 
 - Que Sergio vea el antes y el después y dé su «sí» para crear el repo en GitHub.

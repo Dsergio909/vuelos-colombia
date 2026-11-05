@@ -29,6 +29,15 @@ table Equipo
 
 		annotation SummarizationSetBy = User
 
+	column 'Clave ruta'
+		dataType: string
+		isHidden
+		lineageTag: 24be223b-ad93-5e5c-9349-f17352c3f014
+		summarizeBy: none
+		sourceColumn: Clave ruta
+
+		annotation SummarizationSetBy = User
+
 	column 'Tráfico'
 		dataType: string
 		isHidden
@@ -105,12 +114,14 @@ table Equipo
 				let
 				    Origen = EQ_crudo,
 				    SoloColombia = Table.SelectRows(Origen, each [tr_fico] = "N" or [tr_fico] = "I"),
-				    // Solo vuelos que salen o llegan a Colombia (país sin tildes; la función corre una vez por país distinto)
+				    // Mismo alcance que Trafico: nacional con los dos extremos en Colombia, internacional con uno solo
+				    // (país sin tildes; la función corre una vez por país distinto)
 				    PaisesCrudos = List.Buffer(List.Distinct(List.Transform(List.Combine({SoloColombia[pais_origen], SoloColombia[pais_destino]}), each _ ?? ""))),
 				    PaisLimpio = Record.FromList(List.Transform(PaisesCrudos, fnQuitarTildes), PaisesCrudos),
-				    TocaColombia = Table.SelectRows(SoloColombia,
-				        each Record.FieldOrDefault(PaisLimpio, [pais_origen] ?? "", null) = "COLOMBIA"
-				          or Record.FieldOrDefault(PaisLimpio, [pais_destino] ?? "", null) = "COLOMBIA"),
+				    TocaColombia = Table.SelectRows(SoloColombia, each
+				        let o = Record.FieldOrDefault(PaisLimpio, [pais_origen] ?? "", null) = "COLOMBIA",
+				            d = Record.FieldOrDefault(PaisLimpio, [pais_destino] ?? "", null) = "COLOMBIA"
+				        in ([tr_fico] = "N" and o and d) or ([tr_fico] = "I" and o <> d)),
 				    Columnas = Table.SelectColumns(TocaColombia, {"a_o", "mes", "sigla_empresa", "origen", "destino", "tr_fico",
 				        "tipo_vuelo", "n_mero_de_vuelos", "sillas_ofrecidas", "pasajeros_a_bordo", "carga_correo_a_bordo_kg"}),
 				    Tipos = Table.TransformColumnTypes(Columnas, {{"a_o", Int64.Type}, {"mes", Int64.Type},
@@ -136,7 +147,8 @@ table Equipo
 				        {"Pasajeros a bordo", each List.Sum([pasajeros_a_bordo]), Int64.Type},
 				        {"Pasajeros con sillas", each List.Sum([pax_con_sillas]), Int64.Type},
 				        {"Carga a bordo kg", each List.Sum([carga_correo_a_bordo_kg]), type number}}),
-				    Final = Table.RenameColumns(Agrupado, {{"sigla_empresa", "Sigla"}, {"tr_fico", "Tráfico"}, {"tipo_vuelo", "Tipo de vuelo"}})
+				    ClaveRuta = Table.AddColumn(Agrupado, "Clave ruta", each [Ruta] & "|" & [tr_fico], type text),
+				    Final = Table.RenameColumns(ClaveRuta, {{"sigla_empresa", "Sigla"}, {"tr_fico", "Tráfico"}, {"tipo_vuelo", "Tipo de vuelo"}})
 				in
 				    Final
 

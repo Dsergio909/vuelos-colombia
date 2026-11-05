@@ -25,7 +25,7 @@ con_rango as (
         round(100.0 * (p.pasajeros_2025 - p.pasajeros_2024) / nullif(p.pasajeros_2024, 0), 1)
             as variacion_pct
     from por_ruta p
-    join rutas r using (ruta)
+    join rutas r using (ruta, trafico)
 )
 select
     trafico, puesto, ruta, ciudad_a, ciudad_b,

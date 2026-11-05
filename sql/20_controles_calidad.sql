@@ -15,10 +15,11 @@ with c(orden, control, esperado, obtenido) as (
         0, (select count(*) from od where pasajeros < 0 or carga_kg < 0)
     union all select 6, 'Filas fuera del alcance: trafico Especial',
         12240, (select count(*) from od where trafico = 'Especial')
-    union all select 7, 'Filas fuera del alcance: internacionales sin Colombia',
-        10, (select count(*) from od where trafico <> 'Especial' and not es_colombia)
-    union all select 8, 'Paises con tilde sin corregir',
-        0, (select count(distinct pais_origen) from od where pais_origen <> strip_accents(pais_origen))
+    union all select 7, 'Filas fuera del alcance: el trafico no cuadra con los paises (10 internacionales sin Colombia, 19 nacionales desde Mexico)',
+        29, (select count(*) from od where trafico <> 'Especial' and not es_colombia)
+    union all select 8, 'Paises con tilde sin corregir (origen o destino)',
+        0, (select count(*) from od where pais_origen <> strip_accents(pais_origen)
+                                       or pais_destino <> strip_accents(pais_destino))
     union all select 9, 'Filas de trafico de Colombia sin ciudad o sin aerolinea',
         0, (select count(*) from v_od where ciudad_o is null or ciudad_d is null or aerolinea is null)
     union all select 10, 'Aeropuertos repetidos (mismo codigo y pais)',
@@ -27,6 +28,16 @@ with c(orden, control, esperado, obtenido) as (
         73, (select count(*) - count(distinct (sigla, anio, mes, origen, destino, trafico, tipo_vuelo)) from od)
     union all select 12, 'Meses con datos (enero 2020 a junio 2026)',
         78, (select count(distinct fecha_mes) from od)
+    union all select 13, 'Rutas repetidas (misma ruta y trafico)',
+        0, (select count(*) - count(distinct (ruta, trafico)) from rutas)
+    union all select 14, 'Trafico por Equipo: años o meses que no se pudieron leer',
+        0, (select count(*) from eq where fecha_mes is null)
+    union all select 15, 'Trafico por Equipo: valores negativos de vuelos, sillas, pasajeros o carga',
+        0, (select count(*) from eq where vuelos < 0 or sillas < 0 or pasajeros_a_bordo < 0 or carga_a_bordo_kg < 0)
+    union all select 16, 'Trafico por Equipo: filas nacionales o internacionales que no cuadran con los paises',
+        0, (select count(*) from eq where trafico in ('Nacional', 'Internacional') and not es_colombia)
+    union all select 17, 'Trafico por Equipo: meses con datos (enero 2020 a junio 2026)',
+        78, (select count(distinct fecha_mes) from eq)
 )
 select
     orden,

@@ -14,13 +14,13 @@ relationship 4b7af759-01cc-5080-a3a7-5f8cff29788c
 	fromColumn: Equipo.Sigla
 	toColumn: Aerolineas.Sigla
 
-relationship f2b3f59d-9f59-54f4-9320-c058678a27ca
-	fromColumn: Trafico.Ruta
-	toColumn: Rutas.Ruta
+relationship 42ff77aa-5929-5939-99ab-80a7687b7c74
+	fromColumn: Trafico.'Clave ruta'
+	toColumn: Rutas.'Clave ruta'
 
-relationship bbb32036-4cfa-5798-8081-0e454b4aaf22
-	fromColumn: Equipo.Ruta
-	toColumn: Rutas.Ruta
+relationship c8769a78-8afb-58c6-ad46-cb75da7b09ea
+	fromColumn: Equipo.'Clave ruta'
+	toColumn: Rutas.'Clave ruta'
 
 relationship e3b735fa-77ef-5dee-b24f-46f41320c191
 	fromColumn: Trafico.'Tráfico'

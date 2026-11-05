@@ -27,17 +27,25 @@ def test_sin_negativos(con):
 
 
 def test_alcance_colombia(con):
-    # Fuera: el trafico Especial (entre dos paises extranjeros) y 10 filas de carga
-    # marcadas como internacionales que no tocan Colombia. Nada mas.
+    # Fuera: el trafico Especial (entre dos paises extranjeros) y 29 filas cuyo trafico no
+    # cuadra con los paises: 10 de carga "internacionales" que no tocan Colombia y 19
+    # "nacionales" que salen de Mexico (138 pasajeros). Nada mas.
     total = con.execute("select count(*) from od").fetchone()[0]
     colombia = con.execute("select count(*) from v_od").fetchone()[0]
     especial = con.execute("select count(*) from od where trafico = 'Especial'").fetchone()[0]
     sin_colombia = con.execute(
-        "select count(*) from od where trafico <> 'Especial' and 'COLOMBIA' not in (pais_origen, pais_destino)"
+        "select count(*) from od where trafico <> 'Especial' and not es_colombia"
     ).fetchone()[0]
-    assert (especial, sin_colombia) == (12_240, 10)
+    assert (especial, sin_colombia) == (12_240, 29)
     assert colombia + especial + sin_colombia == total
-    assert con.execute("select sum(pasajeros) from od where trafico <> 'Especial' and not es_colombia").fetchone()[0] == 0
+    assert con.execute("select sum(pasajeros) from od where trafico <> 'Especial' and not es_colombia").fetchone()[0] == 138
+    # en v_od lo nacional tiene los dos extremos en Colombia y lo internacional uno solo
+    mal = con.execute("""
+        select count(*) from v_od
+        where (trafico = 'Nacional' and not (pais_origen = 'COLOMBIA' and pais_destino = 'COLOMBIA'))
+           or (trafico = 'Internacional' and (pais_origen = 'COLOMBIA') = (pais_destino = 'COLOMBIA'))
+    """).fetchone()[0]
+    assert mal == 0
 
 
 def test_paises_sin_tildes_duplicadas(con):
@@ -71,7 +79,18 @@ def test_todas_las_filas_tienen_ciudad_y_aerolinea(con):
 
 
 def test_cada_ruta_tiene_un_solo_nombre(con):
-    assert con.execute("select count(*) - count(distinct ruta) from rutas").fetchone()[0] == 0
+    assert con.execute("select count(*) - count(distinct (ruta, trafico)) from rutas").fetchone()[0] == 0
+
+
+def test_codigos_de_dos_paises_no_se_mezclan(con):
+    # IDA es Puerto Inirida (Colombia) y tambien Idaho; AGU es Aguazul y Aguascalientes.
+    # La ruta nacional y la internacional deben quedar con su propia ciudad.
+    nombres = dict(((r, t), (a, b)) for r, t, a, b in con.execute(
+        "select ruta, trafico, ciudad_a, ciudad_b from rutas where ruta in ('BOG-IDA', 'AGU-BOG')").fetchall())
+    assert nombres[("BOG-IDA", "Nacional")] == ("BOGOTA", "PUERTO INIRIDA")
+    assert nombres[("BOG-IDA", "Internacional")] == ("BOGOTA", "IDAHO")
+    assert nombres[("AGU-BOG", "Nacional")] == ("AGUAZUL", "BOGOTA")
+    assert nombres[("AGU-BOG", "Internacional")] == ("AGUASCALIENTES", "BOGOTA")
 
 
 def test_marcas_existen_en_los_datos(con):

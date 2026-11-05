@@ -160,6 +160,17 @@ Vuelos =
 SUM ( Equipo[Vuelos] )
 ```
 
+### Meses con datos
+
+Meses con datos en el periodo filtrado. 2026 tiene 6 (enero a junio): no se compara con años completos.
+
+Formato: `0`
+
+```dax
+Meses con datos =
+DISTINCTCOUNT ( Trafico[Fecha] )
+```
+
 ## Rutas
 
 ### Pasajeros por aeropuerto

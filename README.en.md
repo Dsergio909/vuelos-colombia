@@ -15,7 +15,7 @@ Between 2022 and 2025 domestic passengers went from 32.7 to 32.9 million: only 0
 In 2022 Viva and Ultra had 24.7% of domestic passengers. In the data, Viva reports until February 2023 and Ultra until March. That year Avianca and LATAM (with their subsidiaries) went from 62.3% to 77.9%, and the HHI concentration index rose from 2,483 to 3,219 (above 2,500 is considered highly concentrated). By 2025 JetSMART had 13.5%, Avianca and LATAM were down to 68.7% and the HHI was 2,738.
 
 **3. Almost everything goes through Bogotá, but the routes that are growing don't.**
-69.5% of domestic passengers in 2025 flew a route that starts or ends at El Dorado. The biggest route is Bogotá - Medellín, with 4.0 million passengers in 2025. Point-to-point routes (for example Medellín - Cartagena or Cali - Cartagena) were Viva's: they fell 20.4% between 2022 and 2024. In 2025 they grew 5.2%, while Bogotá routes fell 3.8%.
+69.5% of domestic passengers in 2025 flew a route that starts or ends at El Dorado. Note: Aerocivil counts passengers per flight leg, so someone flying from Cali to Cartagena with a stop in Bogotá counts on both legs. The biggest route is Bogotá - Medellín, with 4.0 million passengers in 2025. Point-to-point routes (for example Medellín - Cartagena or Cali - Cartagena) were Viva's: they fell 20.4% between 2022 and 2024. In 2025 they grew 5.2%, while Bogotá routes fell 3.8%.
 
 **4. December is the strongest month and February the weakest.**
 With an index where 100 is a normal month, December scores 110.7 on domestic flights and February 88.4 (2022 to 2025 average). So December moves 25% more passengers than February. July and August are the second peak season. If I had to plan capacity or staff, that's where I'd look first.
@@ -59,7 +59,7 @@ Things to keep in mind:
 - **Figures for 2022 to 2025 are provisional.** Aerocivil may correct them. That's why the repo has a fixed copy, downloaded on November 4, 2026, and a test that warns if the source changed.
 - **2026 only goes to June.** 2026 is not compared against full years.
 - **2020 and 2021 are distorted by the pandemic** (from April to August 2020 there were almost no passenger flights). Seasons are calculated with 2022 to 2025.
-- **Only traffic to, from or within Colombia.** I removed 12,240 rows of "Special" traffic: flights between two foreign countries, like Panama - Havana, run by a Colombian airline. I also removed 10 cargo rows marked as international that never touch Colombia (Montevideo - Ezeiza, for example).
+- **Only traffic to, from or within Colombia.** I removed 12,240 rows of "Special" traffic: flights between two foreign countries, like Panama - Havana, run by a Colombian airline. I also removed 29 rows whose traffic type doesn't match the countries: 10 cargo rows marked as international that never touch Colombia (Montevideo - Ezeiza, for example) and 19 marked as domestic that depart from Mexico (138 passengers in 2022). And since the same code can be an airport in Colombia and another one abroad (IDA is Puerto Inírida and also Idaho), each route is identified by its two codes and by whether it is domestic or international.
 - **Cargo includes mail**, because that's how Aerocivil reports it.
 - I added the brand name for the big airlines (for example, AIRES is LATAM Colombia and FAST COLOMBIA was Viva Air) in a short list inside [sql/02_limpiar.sql](sql/02_limpiar.sql). The rest use the name they report.
 
@@ -72,7 +72,7 @@ Derived data in this repo (the copy in `datos/fuente/` and the CSVs in `resultad
 1. **Data:** a script downloads both datasets from the datos.gov.co API (no key, 50,000 rows per page, with retries) and checks that every row arrived.
 2. **Cleaning in SQL (DuckDB):** types, 52 rows with no passengers that I count as 0 and flag, cities written two ways ("CALI" and "SANTIAGO DE CALI"), one airline with several names, and routes without direction (Bogotá - Medellín adds both ways).
 3. **Queries:** 10 analysis queries in numbered, commented `.sql` files (including a data quality report and the forecast), with CTEs and window functions (`rank`, `lag`, shares and running totals).
-4. **Tests:** 38 tests that run on GitHub Actions on every change, plus 2 that run on demand against the live API. They check that yearly totals match the ones the API itself calculates, that cleaning doesn't lose or duplicate rows and that every number in this README comes from the data.
+4. **Tests:** 39 tests that run on GitHub Actions on every change, plus 2 that run on demand against the live API. They check that yearly totals match the ones the API itself calculates, that cleaning doesn't lose or duplicate rows and that every number in this README comes from the data.
 5. **Power BI:** Power Query reads the same copy and cleans it with the same steps. DAX measures and the six pages go on top.
 
 I defined the plan and the questions. The code was written by Claude (AI) and I checked every number against the source.

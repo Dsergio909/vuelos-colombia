@@ -38,6 +38,21 @@
                       "Entity": "Medidas"
                     }
                   },
+                  "Property": "Meses con datos"
+                }
+              },
+              "queryRef": "Medidas.Meses con datos",
+              "nativeQueryRef": "Meses con datos",
+              "displayName": "Meses"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
                   "Property": "Pasajeros"
                 }
               },
